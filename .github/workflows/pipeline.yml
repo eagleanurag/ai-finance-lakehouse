@@ -1,0 +1,67 @@
+name: Daily Lakehouse Pipeline
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Days of transactions to simulate"
+        default: "7"
+
+concurrency:
+  group: lakehouse-pipeline
+  cancel-in-progress: true
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run ingestion (stream + files + masters)
+        env:
+          UPSTASH_KAFKA_REST_URL: ${{ secrets.UPSTASH_KAFKA_REST_URL }}
+          UPSTASH_KAFKA_REST_USERNAME: ${{ secrets.UPSTASH_KAFKA_REST_USERNAME }}
+          UPSTASH_KAFKA_REST_PASSWORD: ${{ secrets.UPSTASH_KAFKA_REST_PASSWORD }}
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          SIM_TXNS_PER_DAY: "25"
+        run: python run_pipeline.py ingest --days "${{ github.event.inputs.days || 7 }}"
+
+      - name: Run transforms (bronze -> silver -> gold)
+        run: python run_pipeline.py transform
+
+      - name: Sync external warehouses
+        if: ${{ vars.ENABLE_WAREHOUSE_SYNC == 'true' }}
+        env:
+          POSTGRES_DSN: ${{ secrets.POSTGRES_DSN }}
+          MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+          BIGQUERY_PROJECT: ${{ secrets.BIGQUERY_PROJECT }}
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcp-key.json
+        run: |
+          echo '${{ secrets.GCP_SA_KEY_JSON }}' > /tmp/gcp-key.json 2>/dev/null || true
+          pip install 'psycopg[binary]' google-cloud-bigquery || true
+          python run_pipeline.py sync
+
+      - name: Commit refreshed warehouse snapshot
+        run: |
+          git config user.name "lakehouse-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/transform_meta.json data/sync_meta.json data/lake 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore(data): nightly lakehouse refresh [skip ci]"
+            git push
+          fi

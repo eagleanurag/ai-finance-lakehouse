@@ -1,0 +1,12 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.duckdb
+*.duckdb.wal
+.streamlit/secrets.toml
+data/*
+!data/README.md
+.DS_Store
+Thumbs.db
