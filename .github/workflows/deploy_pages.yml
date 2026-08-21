@@ -1,0 +1,59 @@
+name: Deploy Project Website (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "src/**"
+      - "transform/**"
+      - "run_pipeline.py"
+      - ".github/workflows/deploy_pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Rebuild warehouse snapshot for live site numbers
+        env:
+          SIM_TXNS_PER_DAY: "25"
+        run: |
+          python run_pipeline.py ingest --days 400 --no-ocr
+          python run_pipeline.py transform
+
+      - name: Generate site data (dictionary + status)
+        run: python scripts/generate_site_data.py
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

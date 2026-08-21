@@ -1,0 +1,431 @@
+{
+  "silver": [
+    {
+      "table": "silver_budgets",
+      "column": "budget_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_budgets",
+      "column": "month_start",
+      "type": "DATE"
+    },
+    {
+      "table": "silver_budgets",
+      "column": "dept_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_budgets",
+      "column": "account_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_budgets",
+      "column": "budget_amount_usd",
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "silver_budgets",
+      "column": "source_channel",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_budgets",
+      "column": "load_batch",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_invoices",
+      "column": "invoice_number",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_invoices",
+      "column": "invoice_date",
+      "type": "DATE"
+    },
+    {
+      "table": "silver_invoices",
+      "column": "vendor_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_invoices",
+      "column": "total_amount_usd",
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "silver_invoices",
+      "column": "tax_amount_usd",
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "silver_invoices",
+      "column": "ocr_engine",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_invoices",
+      "column": "source_file",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_invoices",
+      "column": "load_batch",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "transaction_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "event_ts",
+      "type": "TIMESTAMP WITH TIME ZONE"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "event_date",
+      "type": "DATE"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "dept_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "account_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "vendor_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "amount_usd",
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "currency",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "txn_type",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "source_channel",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "load_batch",
+      "type": "VARCHAR"
+    }
+  ],
+  "gold": [
+    {
+      "table": "dim_date",
+      "column": "date_sk",
+      "type": "INTEGER"
+    },
+    {
+      "table": "dim_date",
+      "column": "full_date",
+      "type": "DATE"
+    },
+    {
+      "table": "dim_date",
+      "column": "year_no",
+      "type": "BIGINT"
+    },
+    {
+      "table": "dim_date",
+      "column": "quarter_no",
+      "type": "BIGINT"
+    },
+    {
+      "table": "dim_date",
+      "column": "month_no",
+      "type": "BIGINT"
+    },
+    {
+      "table": "dim_date",
+      "column": "month_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_date",
+      "column": "year_month",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_date",
+      "column": "week_no",
+      "type": "BIGINT"
+    },
+    {
+      "table": "dim_date",
+      "column": "day_of_week",
+      "type": "BIGINT"
+    },
+    {
+      "table": "dim_date",
+      "column": "is_weekend",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "dim_date",
+      "column": "is_month_end",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "dim_department",
+      "column": "department_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "dim_department",
+      "column": "dept_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_department",
+      "column": "department_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_department",
+      "column": "cost_center",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_department",
+      "column": "headcount",
+      "type": "INTEGER"
+    },
+    {
+      "table": "dim_gl_account",
+      "column": "account_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "dim_gl_account",
+      "column": "account_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_gl_account",
+      "column": "account_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_gl_account",
+      "column": "category",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_vendor",
+      "column": "vendor_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "dim_vendor",
+      "column": "vendor_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_vendor",
+      "column": "vendor_category",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_vendor",
+      "column": "country",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_budget",
+      "column": "budget_sk",
+      "type": "BIGINT"
+    },
+    {
+      "table": "fact_budget",
+      "column": "date_sk",
+      "type": "INTEGER"
+    },
+    {
+      "table": "fact_budget",
+      "column": "month_start",
+      "type": "DATE"
+    },
+    {
+      "table": "fact_budget",
+      "column": "department_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "fact_budget",
+      "column": "account_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "fact_budget",
+      "column": "budget_amount_usd",
+      "type": "DECIMAL(38,2)"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "transaction_sk",
+      "type": "BIGINT"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "transaction_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "date_sk",
+      "type": "INTEGER"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "department_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "account_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "vendor_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "amount_usd",
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "currency",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "txn_type",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "source_channel",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "event_ts",
+      "type": "TIMESTAMP WITH TIME ZONE"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "month_start",
+      "type": "DATE"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "month_sk",
+      "type": "INTEGER"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "department_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "dept_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "department_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "revenue_actual",
+      "type": "DECIMAL(38,2)"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "expense_actual",
+      "type": "DECIMAL(38,2)"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "budget_expense",
+      "type": "DECIMAL(38,2)"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "net_margin_pct",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "expense_variance_pct",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "burn_rate",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "monthly_financials",
+      "column": "month_start",
+      "type": "DATE"
+    },
+    {
+      "table": "monthly_financials",
+      "column": "month_sk",
+      "type": "INTEGER"
+    },
+    {
+      "table": "monthly_financials",
+      "column": "total_revenue",
+      "type": "DECIMAL(38,2)"
+    },
+    {
+      "table": "monthly_financials",
+      "column": "total_expense",
+      "type": "DECIMAL(38,2)"
+    },
+    {
+      "table": "monthly_financials",
+      "column": "net_profit",
+      "type": "DECIMAL(38,2)"
+    },
+    {
+      "table": "monthly_financials",
+      "column": "net_margin_pct",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "monthly_financials",
+      "column": "expense_vs_budget_pct",
+      "type": "DOUBLE"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "generated_utc": "2026-08-21T23:08:20.867304+00:00",
+  "warehouse_ready": true,
+  "fact_rows": 10417,
+  "months_covered": 14,
+  "channels": [
+    "file_upload",
+    "kafka_stream"
+  ],
+  "gold_tables": {
+    "silver.silver_budgets": 468,
+    "silver.silver_invoices": 4,
+    "silver.silver_transactions": 10417,
+    "gold.dim_date": 400,
+    "gold.dim_department": 8,
+    "gold.dim_gl_account": 10,
+    "gold.dim_vendor": 17,
+    "gold.fact_budget": 468,
+    "gold.fact_transactions": 10417,
+    "gold.kpi_monthly_actual_vs_budget": 112,
+    "gold.monthly_financials": 14
+  },
+  "last_transform_utc": "2026-08-21T21:43:53.424423+00:00"
+}

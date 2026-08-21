@@ -268,6 +268,7 @@ def render_dashboard() -> None:
         )
     final_url = (user_url or "").strip()
     if final_url.startswith("http"):
+        st.link_button("↗ Open full dashboard in a new tab", final_url, use_container_width=False)
         components.iframe(final_url, height=620, scrolling=True)
     else:
         st.info(
