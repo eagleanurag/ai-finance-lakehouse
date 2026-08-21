@@ -12,7 +12,7 @@ RETRYABLE_STATUS = {401, 402, 403, 408, 409, 425, 429, 500, 502, 503, 504}
 
 PROVIDERS: dict[str, dict[str, str]] = {
     "groq": {
-        "label": "Groq (Llama 3.3 70B)",
+        "label": "Groq (GPT-OSS 120B)",
         "base_url": "https://api.groq.com/openai/v1/chat/completions",
         "env_var": "GROQ_API_KEY",
         "model_setting": "GROQ_MODEL",
