@@ -43,6 +43,9 @@ class EventBroker:
         return self._consume_file(max_messages)
 
     def _kafka_security_config(self) -> dict[str, str]:
+        import logging
+
+        log = logging.getLogger(__name__)
         conf = {
             "bootstrap.servers": settings.KAFKA_BOOTSTRAP,
             "security.protocol": settings.KAFKA_SECURITY_PROTOCOL,
@@ -53,26 +56,31 @@ class EventBroker:
         ca_path = self._ensure_ca()
         if ca_path:
             conf["ssl.ca.location"] = ca_path
+        else:
+            log.warning(
+                "Aiven CA pem not found at %s - SSL verification will fail until it is placed there",
+                self._ca_path(),
+            )
+        cert = settings.PROJECT_ROOT / "data" / "secrets" / "service.cert"
+        key = settings.PROJECT_ROOT / "data" / "secrets" / "service.key"
+        if cert.exists() and key.exists():
+            conf["security.protocol"] = "SSL"
+            conf["ssl.certificate.location"] = str(cert)
+            conf["ssl.key.location"] = str(key)
         return conf
 
     @staticmethod
-    def _ensure_ca() -> str | None:
+    def _ca_path() -> str:
+        return str(settings.PROJECT_ROOT / "data" / "secrets" / "aiven-ca.pem")
+
+    def _ensure_ca(self) -> str | None:
         """Aiven brokers use Aiven's own CA; librdkafka needs an explicit PEM."""
-        ca_path = settings.PROJECT_ROOT / "data" / "secrets" / "aiven-ca.pem"
+        ca_path = Path(self._ca_path())
         try:
             if ca_path.exists() and ca_path.stat().st_size > 500:
                 return str(ca_path)
-            import urllib.request
-
-            url = "https://secure.aiven.io/ca.pem"
-            with urllib.request.urlopen(url, timeout=30) as resp:
-                data = resp.read()
-            if len(data) > 500:
-                ca_path.parent.mkdir(parents=True, exist_ok=True)
-                ca_path.write_bytes(data)
-                return str(ca_path)
         except Exception:
-            return None
+            pass
         return None
 
     def _produce_native(self, events: list[dict[str, Any]]) -> int:
