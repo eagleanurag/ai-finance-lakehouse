@@ -29,12 +29,6 @@ PROVIDERS: dict[str, dict[str, str]] = {
         "env_var": "MISTRAL_API_KEY",
         "model_setting": "MISTRAL_MODEL",
     },
-    "cerebras": {
-        "label": "Cerebras (GPT-OSS 120B)",
-        "base_url": "https://api.cerebras.ai/v1/chat/completions",
-        "env_var": "CEREBRAS_API_KEY",
-        "model_setting": "CEREBRAS_MODEL",
-    },
     "openrouter": {
         "label": "OpenRouter (Free models)",
         "base_url": "https://openrouter.ai/api/v1/chat/completions",

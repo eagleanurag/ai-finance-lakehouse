@@ -36,20 +36,19 @@ load_dotenv(PROJECT_ROOT / ".env")
 GROQ_API_KEY = _secret("GROQ_API_KEY")
 GEMINI_API_KEY = _secret("GEMINI_API_KEY")
 MISTRAL_API_KEY = _secret("MISTRAL_API_KEY")
-CEREBRAS_API_KEY = _secret("CEREBRAS_API_KEY")
+DEEPSEEK_API_KEY = _secret("DEEPSEEK_API_KEY")
 OPENROUTER_API_KEY = _secret("OPENROUTER_API_KEY")
 
 GROQ_MODEL = _secret("GROQ_MODEL", "openai/gpt-oss-120b")
 GEMINI_MODEL = _secret("GEMINI_MODEL", "gemini-flash-latest")
 MISTRAL_MODEL = _secret("MISTRAL_MODEL", "mistral-small-latest")
-CEREBRAS_MODEL = _secret("CEREBRAS_MODEL", "gpt-oss-120b")
 OPENROUTER_MODEL = _secret("OPENROUTER_MODEL", "nvidia/nemotron-3-super-120b-a12b:free")
 
 PROVIDER_ORDER = [
     p.strip()
     for p in _secret(
         "LLM_PROVIDER_ORDER",
-        "groq,gemini,mistral,cerebras,openrouter",
+        "groq,gemini,mistral,openrouter",
     ).split(",")
     if p.strip()
 ]

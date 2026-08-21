@@ -31,7 +31,7 @@ Streaming + batch ingestion → medallion lakehouse (Bronze/Silver/Gold) → sta
            ▼                               ▼
 ┌────────── BI SERVING ──────────┐  ┌───────── AI ANALYST ────────────────┐
 │  Power BI publish-to-web embed │  │  Multi-provider router w/ fallback: │
-│  + native Plotly KPI app       │  │  Groq → Gemini → Mistral → others   │
+│  + native Plotly KPI app       │  │  Groq → Gemini → Mistral → OpenRouter │
 │                                │  │  Tools: Text-to-SQL · Forecasting   │
 └────────────────────────────────┘  └─────────────────────────────────────┘
 ```
@@ -41,7 +41,7 @@ Streaming + batch ingestion → medallion lakehouse (Bronze/Silver/Gold) → sta
 - **4 source connector types** — Kafka streaming events (Upstash REST), CSV/Excel file drops, SharePoint/MS Graph sync, and image→text OCR invoice extraction (RapidOCR/Tesseract)
 - **Medallion architecture** — immutable bronze partitions, deduplicated typed silver, gold star schema built from versioned SQL models executed by a DuckDB runner
 - **Multi-warehouse sync** — one command pushes gold tables to Neon Postgres, BigQuery Sandbox, MotherDuck, and Azure SQL (each auto-skips when unconfigured)
-- **LLM gateway with automatic failover** — Text-to-SQL answers survive rate limits by shifting Groq → Gemini → Mistral → Cerebras → OpenRouter; manual model selection included
+- **LLM gateway with automatic failover** — Text-to-SQL answers survive rate limits by shifting Groq → Gemini → Mistral → OpenRouter; manual model selection included
 - **Guarded Text-to-SQL** — schema-aware prompting, SELECT-only sanitizer, self-repair retry loop, enforced LIMITs
 - **Statistical forecasting** — Prophet if installed, otherwise damped Holt-Winters on monthly aggregates, rendered with confidence bands
 - **Public showcase** — Streamlit Community Cloud hosts the dashboard + chat; recruiters need zero logins
@@ -76,11 +76,10 @@ Copy `.env.example` to `.env` and fill in only what you use. **Every key is opti
 | Serverless OLAP | [MotherDuck](https://motherduck.com) — 10 GB free plan | `MOTHERDUCK_TOKEN` |
 | MS SQL | Azure SQL DB — 12 months free | `MSSQL_DSN` (+ `pip install pyodbc`) |
 | SharePoint | MS Graph app registration | `SHAREPOINT_TENANT_ID` `_CLIENT_ID` `_CLIENT_SECRET` `_SITE_HOST` `_DRIVE_ID` |
-| LLM #1 | [Groq Cloud](https://console.groq.com) — free dev tier, fastest TtS engine | `GROQ_API_KEY` |
-| LLM #2 | [Google AI Studio](https://aistudio.google.com) — free Gemini API | `GEMINI_API_KEY` |
+| LLM #1 | [Groq Cloud](https://console.groq.com) — forever-free dev tier, fastest TtS engine | `GROQ_API_KEY` |
+| LLM #2 | [Google AI Studio](https://aistudio.google.com) — free Gemini API tier | `GEMINI_API_KEY` |
 | LLM #3 | [Mistral La Plateforme](https://console.mistral.ai) — free experiment tier | `MISTRAL_API_KEY` |
-| LLM #4 | [Cerebras Cloud](https://cloud.cerebras.ai) — free tier, fastest inference | `CEREBRAS_API_KEY` |
-| LLM #5 | [OpenRouter](https://openrouter.ai/keys) — has free model tier | `OPENROUTER_API_KEY` |
+| LLM #4 | [OpenRouter](https://openrouter.ai/keys) — free model tier (`:free` models), no card | `OPENROUTER_API_KEY` |
 | BI | Power BI Desktop (free) → publish-to-web URL | `POWERBI_EMBED_URL` |
 
 ### How the AI failover works
@@ -90,15 +89,14 @@ prompt ──► router("auto")
              ├─ 1. Groq gpt-oss-120b ........ HTTP 429? ──┐
              ├─ 2. Gemini Flash .............. on error ──┤ retries next provider
              ├─ 3. Mistral Small ............. on error ──┤
-             ├─ 4. Cerebras gpt-oss-120b ..... on error ──┤
-             └─ 5. OpenRouter llama-3.3 ...... on error ──┘
+             └─ 4. OpenRouter nemotron :free . on error ──┘
                           ▼
         response + full attempt trace shown in the UI ("🔀 Router trace")
 ```
 
 Order is configurable via `LLM_PROVIDER_ORDER`; the sidebar dropdown pins any single provider manually. The router treats 401/402/403/408/429/5xx/timeouts as failover triggers.
 
-> ℹ️ GitHub Models was an earlier 4th provider but the service was fully retired by GitHub on July 30, 2026 — it has been replaced here with Cerebras + OpenRouter.
+> ℹ️ Provider history: GitHub Models was retired by GitHub on July 30, 2026 and Cerebras moved its free tier behind a billing wall — both were dropped in favor of the four always-free providers above.
 
 ## Deploy the public demo (Streamlit Community Cloud)
 
