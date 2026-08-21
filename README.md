@@ -11,7 +11,7 @@ Streaming + batch ingestion → medallion lakehouse (Bronze/Silver/Gold) → sta
 ```
 ┌──────────────────────────────── SOURCES ────────────────────────────────┐
 │  📡 Streaming txns       📁 CSV/Excel uploads     🏢 SharePoint/Graph    │
-│  (Kafka / Upstash REST   (Finance team budget     (Master data sync)     │
+│  (Apache Kafka SSL   (Finance team budget     (Master data sync)     │
 │   or local file broker)   exports)                 🧾 Invoice images+OCR │
 └──────────┬─────────────────────────┬───────────────────────┬────────────┘
            ▼                         ▼                       ▼
@@ -38,7 +38,7 @@ Streaming + batch ingestion → medallion lakehouse (Bronze/Silver/Gold) → sta
 
 ## Highlights
 
-- **4 source connector types** — Kafka streaming events (Upstash REST), CSV/Excel file drops, SharePoint/MS Graph sync, and image→text OCR invoice extraction (RapidOCR/Tesseract)
+- **4 source connector types** — Kafka streaming events (Aiven, SASL_SSL), CSV/Excel file drops, SharePoint/MS Graph sync, and image→text OCR invoice extraction (RapidOCR/Tesseract)
 - **Medallion architecture** — immutable bronze partitions, deduplicated typed silver, gold star schema built from versioned SQL models executed by a DuckDB runner
 - **Multi-warehouse sync** — one command pushes gold tables to Neon Postgres, BigQuery Sandbox, MotherDuck, and Azure SQL (each auto-skips when unconfigured)
 - **LLM gateway with automatic failover** — Text-to-SQL answers survive rate limits by shifting Groq → Gemini → Mistral → OpenRouter; manual model selection included
@@ -69,7 +69,7 @@ Copy `.env.example` to `.env` and fill in only what you use. **Every key is opti
 
 | Layer | Service (free tier) | Env keys |
 |---|---|---|
-| Streaming | [Upstash Kafka](https://upstash.com) — forever free, 10k msg/day | `UPSTASH_KAFKA_REST_URL` `_USERNAME` `_PASSWORD` |
+| Streaming | [Aiven Apache Kafka](https://aiven.io/free-kafka) — forever-free plan, real Kafka protocol over SSL, no card | `KAFKA_BOOTSTRAP` `KAFKA_USERNAME` `KAFKA_PASSWORD` |
 | Bronze lake | Azure Blob / ADLS Gen2 — 5 GB always free | `AZURE_STORAGE_CONNECTION_STRING`, `AZURE_CONTAINER` |
 | OLAP warehouse | [BigQuery Sandbox](https://cloud.google.com/bigquery/docs/sandbox) — no card, 1 TB query/mo | `BIGQUERY_PROJECT`, `GOOGLE_APPLICATION_CREDENTIALS` |
 | OLTP serving | [Neon](https://neon.tech) / Supabase Postgres — free serverless | `POSTGRES_DSN` |
@@ -148,4 +148,4 @@ ai-finance-lakehouse/
 - Designed a hybrid batch/streaming lakehouse (Kafka → Bronze/Silver/Gold) with idempotent, partitioned raw storage and dimensional star-schema modeling
 - Built vendor-agnostic LLM gateway with rate-limit-aware multi-provider failover and read-only guarded Text-to-SQL generation with self-correction loops
 - Integrated statistical forecasting (Prophet/Holt-Winters) into an agentic analytics workflow with executive-grade narrative synthesis
-- Delivered $0 cloud cost via layered free tiers (Upstash, Azure, GCP BigQuery Sandbox, Neon, MotherDuck, Streamlit Cloud, GitHub Actions) with graceful degradation when unconfigured
+- Delivered $0 cloud cost via layered free tiers (Aiven, Azure, GCP BigQuery Sandbox, Neon, MotherDuck, Streamlit Cloud, GitHub Actions) with graceful degradation when unconfigured

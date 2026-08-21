@@ -9,12 +9,26 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import requests
 
+from src.sources.kafka_client import EventBroker
+
 
 def check_kafka() -> dict:
     from config import settings
 
+    if settings.KAFKA_MODE == "aiven_ssl":
+        try:
+            broker = EventBroker()
+            sent = broker.produce([{"_health": "ping"}])
+            drained = broker.consume_all(max_messages=10)
+            return {
+                "service": "Kafka",
+                "ok": True,
+                "detail": f"produced {sent} event(s) to '{broker.topic}' via SSL, consumer read {len(drained)}",
+            }
+        except Exception as exc:
+            return {"service": "Kafka", "ok": False, "detail": str(exc)[:200]}
     if settings.KAFKA_MODE != "upstash_rest":
-        return {"service": "Kafka", "ok": False, "detail": "UPSTASH_KAFKA_REST_URL not set — using local file broker"}
+        return {"service": "Kafka", "ok": False, "detail": "No cloud Kafka configured ??? using local file broker"}
     try:
         resp = requests.post(
             f"{settings.UPSTASH_KAFKA_REST_URL}/produce/{settings.KAFKA_TOPIC}",
@@ -32,7 +46,7 @@ def check_postgres() -> dict:
     from config import settings
 
     if not settings.POSTGRES_DSN:
-        return {"service": "Postgres", "ok": False, "detail": "POSTGRES_DSN not set — gold tables live only in local DuckDB"}
+        return {"service": "Postgres", "ok": False, "detail": "POSTGRES_DSN not set ??? gold tables live only in local DuckDB"}
     try:
         import psycopg
 
@@ -58,3 +72,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

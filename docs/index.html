@@ -96,7 +96,7 @@
       lakehouse (Bronze → Silver → Gold), a dimensional star schema warehouse, live BI dashboards,
       and an LLM analyst that writes SQL and forecasts revenue — built entirely on free tiers.</p>
     <div class="badges">
-      <span class="badge">📡 Apache Kafka / Upstash REST</span>
+      <span class="badge">📡 Apache Kafka 4.1 (SSL)</span>
       <span class="badge">🥉🥈🥇 Medallion Architecture</span>
       <span class="badge">⭐ Star Schema + DuckDB SQL Engine</span>
       <span class="badge">🧠 Multi-Provider LLM Failover</span>
@@ -131,7 +131,7 @@
 <pre class="mermaid">
 flowchart LR
   subgraph SOURCES["DIVERSE SOURCES"]
-    S1["📡 Kafka stream\ntransactions"]
+    S1["📡 Kafka topic\nfinance.transactions"]
     S2["📁 CSV/Excel\nbudget exports"]
     S3["🏢 SharePoint / Graph\nmaster data"]
     S4["🧾 Invoice images\nOCR extraction"]
@@ -155,7 +155,7 @@ flowchart LR
     LLM["🤖 LLM Agent\nText-to-SQL + Prophet forecast"]
   end
   WAREHOUSE[("Neon Postgres /\nBigQuery Sandbox")]
-  S1 -->|produce| B
+  S1 -->|native SSL produce/consume| B
   S2 -->|file drop| B
   S3 -->|sync API| B
   S4 -->|OCR JSON| B
@@ -176,7 +176,7 @@ flowchart LR
     <p class="section-sub">Four distinct ingestion patterns — each with its own transport, failure modes, and landing format.</p>
     <div class="cards-grid">
       <div class="src-card"><span class="tag">streaming</span><h3>📡 Kafka Transactions</h3>
-        <p>Point-of-sale style events published to an Upstash Kafka topic via REST, drained to bronze partitions by the consumer step. Falls back to a local file broker for offline dev.</p></div>
+        <p>Point-of-sale style events produced to a real managed Apache Kafka 4.1 cluster (Aiven free tier) over SASL_SSL using the native librdkafka client, drained to bronze partitions by the consumer step. Falls back to a local file broker for offline dev.</p></div>
       <div class="src-card"><span class="tag">batch files</span><h3>📁 Finance CSV/Excel</h3>
         <p>Budget workbooks dropped by the finance team — schema-detected, normalized, and landed as typed records with source lineage preserved.</p></div>
       <div class="src-card"><span class="tag">API sync</span><h3>🏢 SharePoint / MS Graph</h3>
