@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import time
 from typing import Any
@@ -18,7 +18,7 @@ PROVIDERS: dict[str, dict[str, str]] = {
         "model_setting": "GROQ_MODEL",
     },
     "gemini": {
-        "label": "Google Gemini 2.0 Flash",
+        "label": "Google Gemini Flash",
         "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
         "env_var": "GEMINI_API_KEY",
         "model_setting": "GEMINI_MODEL",
@@ -163,3 +163,4 @@ def simple_completion(prompt: str, system: str, provider_key: str = "auto") -> d
         {"role": "user", "content": prompt},
     ]
     return chat(messages, provider_key=provider_key)
+

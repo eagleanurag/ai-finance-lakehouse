@@ -39,7 +39,7 @@ MISTRAL_API_KEY = _secret("MISTRAL_API_KEY")
 GITHUB_MODELS_TOKEN = _secret("GITHUB_MODELS_TOKEN")
 
 GROQ_MODEL = _secret("GROQ_MODEL", "openai/gpt-oss-120b")
-GEMINI_MODEL = _secret("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_MODEL = _secret("GEMINI_MODEL", "gemini-flash-latest")
 MISTRAL_MODEL = _secret("MISTRAL_MODEL", "mistral-small-latest")
 GITHUB_MODELS_MODEL = _secret("GITHUB_MODELS_MODEL", "gpt-4o-mini")
 
