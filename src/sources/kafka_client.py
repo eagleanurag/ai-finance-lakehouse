@@ -43,13 +43,37 @@ class EventBroker:
         return self._consume_file(max_messages)
 
     def _kafka_security_config(self) -> dict[str, str]:
-        return {
+        conf = {
             "bootstrap.servers": settings.KAFKA_BOOTSTRAP,
             "security.protocol": settings.KAFKA_SECURITY_PROTOCOL,
             "sasl.mechanisms": settings.KAFKA_SASL_MECHANISM,
             "sasl.username": settings.KAFKA_USERNAME,
             "sasl.password": settings.KAFKA_PASSWORD,
         }
+        ca_path = self._ensure_ca()
+        if ca_path:
+            conf["ssl.ca.location"] = ca_path
+        return conf
+
+    @staticmethod
+    def _ensure_ca() -> str | None:
+        """Aiven brokers use Aiven's own CA; librdkafka needs an explicit PEM."""
+        ca_path = settings.PROJECT_ROOT / "data" / "secrets" / "aiven-ca.pem"
+        try:
+            if ca_path.exists() and ca_path.stat().st_size > 500:
+                return str(ca_path)
+            import urllib.request
+
+            url = "https://secure.aiven.io/ca.pem"
+            with urllib.request.urlopen(url, timeout=30) as resp:
+                data = resp.read()
+            if len(data) > 500:
+                ca_path.parent.mkdir(parents=True, exist_ok=True)
+                ca_path.write_bytes(data)
+                return str(ca_path)
+        except Exception:
+            return None
+        return None
 
     def _produce_native(self, events: list[dict[str, Any]]) -> int:
         from confluent_kafka import Producer
