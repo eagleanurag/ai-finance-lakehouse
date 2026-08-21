@@ -92,7 +92,8 @@ class EventBroker:
                     continue
                 events.append(json.loads(msg.value().decode("utf-8")))
                 idle_deadline = time.time() + 3
-            consumer.commit(asynchronous=False)
+            if events:
+                consumer.commit(asynchronous=False)
         finally:
             consumer.close()
         return events
