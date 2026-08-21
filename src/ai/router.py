@@ -29,11 +29,17 @@ PROVIDERS: dict[str, dict[str, str]] = {
         "env_var": "MISTRAL_API_KEY",
         "model_setting": "MISTRAL_MODEL",
     },
-    "github_models": {
-        "label": "GitHub Models (GPT-4o mini)",
-        "base_url": "https://models.inference.ai.azure.com/chat/completions",
-        "env_var": "GITHUB_MODELS_TOKEN",
-        "model_setting": "GITHUB_MODELS_MODEL",
+    "cerebras": {
+        "label": "Cerebras (GPT-OSS 120B)",
+        "base_url": "https://api.cerebras.ai/v1/chat/completions",
+        "env_var": "CEREBRAS_API_KEY",
+        "model_setting": "CEREBRAS_MODEL",
+    },
+    "openrouter": {
+        "label": "OpenRouter (Free models)",
+        "base_url": "https://openrouter.ai/api/v1/chat/completions",
+        "env_var": "OPENROUTER_API_KEY",
+        "model_setting": "OPENROUTER_MODEL",
     },
 }
 

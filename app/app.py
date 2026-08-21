@@ -283,7 +283,7 @@ def render_chat() -> None:
     if not providers_now:
         st.warning(
             "No LLM API keys configured. Add `GROQ_API_KEY` / `GEMINI_API_KEY` / `MISTRAL_API_KEY` / "
-            "`GITHUB_MODELS_TOKEN` to `.env` locally or to this Space's/app's secrets. "
+            "`CEREBRAS_API_KEY` / `OPENROUTER_API_KEY` to `.env` locally or to this Space's/app's secrets. "
             "All non-AI features keep working."
         )
         st.stop()

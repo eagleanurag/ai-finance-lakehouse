@@ -41,11 +41,15 @@ GITHUB_MODELS_TOKEN = _secret("GITHUB_MODELS_TOKEN")
 GROQ_MODEL = _secret("GROQ_MODEL", "openai/gpt-oss-120b")
 GEMINI_MODEL = _secret("GEMINI_MODEL", "gemini-flash-latest")
 MISTRAL_MODEL = _secret("MISTRAL_MODEL", "mistral-small-latest")
-GITHUB_MODELS_MODEL = _secret("GITHUB_MODELS_MODEL", "gpt-4o-mini")
+CEREBRAS_MODEL = _secret("CEREBRAS_MODEL", "gpt-oss-120b")
+OPENROUTER_MODEL = _secret("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
 
 PROVIDER_ORDER = [
     p.strip()
-    for p in _secret("LLM_PROVIDER_ORDER", "groq,gemini,mistral,github_models").split(",")
+    for p in _secret(
+        "LLM_PROVIDER_ORDER",
+        "groq,gemini,mistral,cerebras,openrouter",
+    ).split(",")
     if p.strip()
 ]
 
