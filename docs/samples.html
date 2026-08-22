@@ -338,8 +338,66 @@
     </div>
   </div>
 
+  <!-- V9 -->
+  <div class="variant" id="v9">
+    <div class="v-head"><span class="v-num">9</span><div><b>Classic Mermaid Layered Graph (README style)</b><br><span class="desc">The original layered flowchart with color-coded subgraphs · GitHub-style rendering</span></div><button class="choose-btn" onclick="pick(9)">✔ Choose</button></div>
+    <div class="demo">
+      <pre class="mermaid">
+flowchart LR
+  subgraph SRC["📡 DIVERSE SOURCES"]
+    S1["Kafka topic\nSSL native"]
+    S2["CSV / Excel\nbudget exports"]
+    S3["SharePoint / Graph\nmaster data"]
+    S4["Invoices + OCR\nextraction"]
+  end
+  subgraph BRZ["🥉 BRONZE LAKE"]
+    B[("Raw JSONL partitions\ndt=.../source=...\n→ Azure Blob mirror")]
+  end
+  subgraph SLV["🥈 SILVER"]
+    SV["Typed · deduplicated\nstandardized entities\nDuckDB SQL engine"]
+  end
+  subgraph GLD["🥇 GOLD STAR SCHEMA"]
+    F1[("fact_transactions")]
+    F2[("fact_budget")]
+    D1["dim_date · dim_department"]
+    D2["dim_gl_account · dim_vendor"]
+    KPI["kpi_monthly_actual_vs_budget\nmonthly_financials"]
+  end
+  WAR[("☁️ Neon Postgres LIVE\nBigQuery Sandbox")]
+  subgraph SRV["📊 SERVING / BI + 🤖 AI"]
+    PBI["Power BI dashboard"]
+    APP["Streamlit portal"]
+    AGENT["LLM Agent: Text-to-SQL\nProphet forecasting"]
+  end
+  S1 & S2 & S3 & S4 --> BRZ
+  BRZ -->|"11 SQL models"| SLV
+  SLV --> GLD
+  GLD -.->|nightly sync| WAR
+  GLD & WAR --> PBI & AGENT
+  AGENT --> APP
+  PBI --> APP
+
+  classDef srcBox fill:#38BDF81f,stroke:#38BDF8,stroke-width:1.5px,color:#bae6fd
+  classDef broBox fill:#F59E0B1f,stroke:#F59E0B,stroke-width:1.5px,color:#fde68a
+  classDef silBox fill:#94A3B81f,stroke:#94A3B8,stroke-width:1.5px,color:#e2e8f0
+  classDef gldBox fill:#EAB3081f,stroke:#EAB308,stroke-width:1.5px,color:#fef08a
+  classDef warBox fill:#22C55E1f,stroke:#22C55E,stroke-width:1.5px,color:#bbf7d0
+  classDef srvBox fill:#EC48991f,stroke:#EC4899,stroke-width:1.5px,color:#fbcfe8
+
+  class S1,S2,S3,S4 srcBox
+  class B broBox
+  class SV silBox
+  class F1,F2,D1,D2,KPI gldBox
+  class WAR warBox
+  class PBI,APP,AGENT srvBox
+      </pre>
+      <p class="foot-note">The classic layered look from the README · color-coded subgraphs · GitHub-style rendering</p>
+    </div>
+  </div>
+
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
 <script>
   const saved = localStorage.getItem('pickedVariant');
   if (saved) {
@@ -356,8 +414,12 @@
     localStorage.setItem('pickedVariant', n);
     const banner = document.getElementById('banner');
     banner.style.display = 'block';
-    banner.innerHTML = `✅ Marked: <b>Design ${n}</b> — now just tell me “design ${n}” and I'll implement it on the real site with clickable zoom-in details.`;
+    banner.innerHTML = `✅ Marked: <b>Design ${n}</b> — now just tell me "design ${n}" and I'll implement it on the real site with clickable zoom-in details.`;
   }
+</script>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'dark', flowchart: { curve: 'basis' }, themeVariables: { fontSize: '14px' } });
 </script>
 
 <a href="./index.html" style="position:fixed;top:14px;left:14px;font-size:13px;">← Back to main site</a>
