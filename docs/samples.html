@@ -3,425 +3,394 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pipeline Design Samples — Pick Your Layout</title>
+<title>Mermaid Design Lab — 8 Styles · Pick Your Architecture Look</title>
 <style>
-  :root {
-    --bg:#0E1117; --bg2:#161B26; --bg3:#1C2333;
-    --accent:#6C8CFF; --accent2:#22C55E; --text:#E8EAED; --muted:#9AA3B5; --border:#26304280;
-    --c-sources:#38BDF8; --c-bronze:#F59E0B; --c-silver:#94A3B8; --c-gold:#EAB308;
-    --c-ware:#22C55E; --c-serve:#EC4899; --c-ai:#A78BFA;
-    --f-sources:#bae6fd; --f-bronze:#fde68a; --f-silver:#e2e8f0; --f-gold:#fef08a;
-    --f-ware:#bbf7d0; --f-serve:#fbcfe8; --f-ai:#ddd6fe;
-  }
+  :root { --bg:#0E1117; --bg2:#161B26; --bg3:#1C2333; --accent:#6C8CFF; --accent2:#22C55E;
+    --text:#E8EAED; --muted:#9AA3B5; --border:#26304280; }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; padding:28px 18px 60px; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; padding:26px 16px 60px; }
   .wrap { max-width:1250px; margin:0 auto; }
   h1 { font-size:24px; margin-bottom:6px; }
-  .sub { color:var(--muted); font-size:14px; margin-bottom:10px; }
-  .picked-banner { display:none; background:#22C55E22; border:1px solid var(--accent2); color:#bbf7d0;
-    padding:12px 16px; border-radius:10px; font-size:14.5px; margin-bottom:20px; }
-  .picked-banner b { color:#fff; }
+  .sub { color:var(--muted); font-size:14px; margin-bottom:18px; line-height:1.5; }
 
-  .variant { background:var(--bg2); border:1.5px solid var(--border); border-radius:14px;
-    margin-bottom:34px; overflow:hidden; transition:border-color .25s; }
+  .variant { background:var(--bg2); border:1.5px solid var(--border); border-radius:14px; margin-bottom:30px; overflow:hidden; transition:border-color .25s, box-shadow .25s; }
   .variant.chosen { border-color:var(--accent2); box-shadow:0 0 30px #22C55E33; }
-  .v-head { display:flex; align-items:center; gap:12px; padding:13px 16px; border-bottom:1px solid var(--border);
-    flex-wrap:wrap; }
-  .v-num { background:var(--accent); color:#fff; font-weight:800; width:32px; height:32px; border-radius:8px;
-    display:inline-flex; align-items:center; justify-content:center; }
+  .v-head { display:flex; align-items:center; gap:12px; padding:13px 16px; border-bottom:1px solid var(--border); flex-wrap:wrap; background:var(--bg3); }
+  .v-num { background:var(--accent); color:#fff; font-weight:800; width:32px; height:32px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; }
   .v-head b { font-size:15.5px; }
-  .v-head span.desc { color:var(--muted); font-size:13px; }
-  .choose-btn { margin-left:auto; background:var(--bg3); border:1px solid var(--accent); color:var(--accent);
-    padding:6px 14px; border-radius:7px; cursor:pointer; font-size:13px; font-weight:600; }
+  .v-head span.desc { color:var(--muted); font-size:12.5px; display:block; }
+  .choose-btn { margin-left:auto; background:var(--bg); border:1.5px solid var(--accent); color:var(--accent);
+    padding:7px 15px; border-radius:7px; cursor:pointer; font-size:13px; font-weight:600; white-space:nowrap; }
   .choose-btn:hover { background:var(--accent); color:#fff; }
   .variant.chosen .choose-btn { background:var(--accent2); border-color:var(--accent2); color:#06280f; }
-  .demo { padding:16px; overflow-x:auto; }
+  .demo { padding:14px; overflow-x:auto; position:relative; }
+  .demo svg { max-width:100%; height:auto; }
 
-  /* ---- shared node/chip look ---- */
-  .nd { background:var(--bg3); border-radius:7px; padding:6px 9px; font-size:11.5px;
-    border-left:2.5px solid; line-height:1.35; }
-  .nd b { font-weight:600; display:block; }
-  .nd small { color:var(--muted); font-size:10px; }
-  .nd.src { border-color:var(--c-sources); } .nd.bro { border-color:var(--c-bronze); }
-  .nd.sil { border-color:var(--c-silver); } .nd.gld { border-color:var(--c-gold); }
-  .nd.war { border-color:var(--c-ware); } .nd.srv { border-color:var(--c-serve); }
-  .nd.aii { border-color:var(--c-ai); }
+  /* interaction affordance hint */
+  .hint { color:var(--accent2); font-size:12.5px; padding:0 16px 10px; }
+  .hint b::before { content:'🖱️ '; }
 
-  .stage-label { font-size:10px; letter-spacing:.8px; font-weight:700; text-transform:uppercase; margin-bottom:5px; }
-  .l-src { color:var(--c-sources); } .l-bro { color:var(--c-bronze); } .l-sil { color:var(--c-silver); }
-  .l-gld { color:var(--c-gold); } .l-war { color:var(--c-ware); } .l-srv { color:var(--c-serve); } .l-aii { color:var(--c-ai); }
+  /* ---------- TOOLTIP ---------- */
+  #tip { position:fixed; z-index:9999; max-width:340px; background:#1C2333F5; border:1.5px solid var(--accent);
+    color:var(--text); font-size:13px; line-height:1.45; padding:11px 14px; border-radius:10px;
+    box-shadow:0 10px 34px #000000A0; pointer-events:none; opacity:0; transition:opacity .15s; backdrop-filter:blur(6px); }
+  #tip.on { opacity:1; }
+  #tip .t-title { font-weight:700; margin-bottom:3px; }
 
-  /* animated dash line */
-  .dash-h { height:3px; min-width:34px; border-radius:2px;
-    background:repeating-linear-gradient(90deg,var(--accent2) 0 6px,transparent 6px 12px);
-    animation:dashX .65s linear infinite; }
-  @keyframes dashX { from{background-position-x:0} to{background-position-x:12px} }
-  .arrow-r::after { content:'▸'; color:var(--accent2); margin-left:-4px; font-size:14px; }
-  .dash-v { width:3px; min-height:30px; border-radius:2px; margin:0 auto;
-    background:repeating-linear-gradient(180deg,var(--accent2) 0 6px,transparent 6px 12px);
-    animation:dashY .65s linear infinite; }
-  @keyframes dashY { from{background-position-y:0} to{background-position-y:12px} }
-  .arrow-d::after { content:'▾'; color:var(--accent2); display:block; text-align:center; margin-top:-6px; font-size:14px; }
+  /* ---------- MODAL (click zoom) ---------- */
+  #modal { position:fixed; inset:0; z-index:10000; background:#05070CE6; display:none;
+    align-items:center; justify-content:center; backdrop-filter:blur(4px); cursor:zoom-out; }
+  #modal.on { display:flex; }
+  .mcard { max-width:520px; width:calc(100% - 40px); background:linear-gradient(160deg,var(--bg2),var(--bg3));
+    border:2px solid var(--accent); border-radius:18px; padding:28px 26px; box-shadow:0 20px 80px #000C;
+    animation:popIn .25s ease; cursor:default; }
+  @keyframes popIn { from { transform:scale(.85); opacity:0; } to { transform:none; opacity:1; } }
+  .mcard .micon { font-size:44px; margin-bottom:10px; }
+  .mcard h3 { font-size:21px; margin-bottom:10px; }
+  .mcard p { color:var(--muted); font-size:15px; line-height:1.65; }
+  .mcard small { display:block; margin-top:16px; color:var(--accent); font-size:12px; }
 
-  /* ============ V1: HORIZONTAL COMPACT ============ */
-  .v1-row { display:flex; align-items:stretch; gap:0; min-width:900px; }
-  .v1-col { flex:1; border:1.5px solid; border-radius:10px; padding:9px; min-width:0; background:var(--bg3); }
-  .v1-c { display:flex; align-items:center; gap:0; flex:0 0 42px; justify-content:center; flex-direction:column; }
-  .v1-col .stage-label { text-align:center; }
-
-  /* ============ V2: FLAT WIDE ROW ============ */
-  .v2-flow { display:flex; align-items:center; gap:0; min-width:1000px; }
-  .v2-card { flex:1; border:1px solid; border-radius:9px; padding:8px 10px; }
-  .v2-card .chipline { display:flex; gap:5px; margin-top:6px; flex-wrap:nowrap; }
-  .v2-card .chipline .nd { flex:1; min-width:0; font-size:10px; padding:4px 6px; }
-
-  /* ============ V3: VERTICAL TIMELINE ============ */
-  .v3-wrap { position:relative; padding-left:26px; max-width:720px; }
-  .v3-wrap::before { content:''; position:absolute; left:8px; top:0; bottom:0; width:3px;
-    background:repeating-linear-gradient(180deg,var(--accent2) 0 6px,transparent 6px 12px);
-    animation:dashY .65s linear infinite; }
-  .v3-item { position:relative; margin-bottom:12px; }
-  .v3-item::before { content:''; position:absolute; left:-23px; top:14px; width:11px; height:11px;
-    border-radius:50%; background:var(--bg); border:2.5px solid var(--accent2); }
-  .v3-item.right { margin-left:120px; }
-  .v3-item.left { margin-right:120px; }
-  .v3-item .nd { display:inline-block; min-width:260px; }
-
-  /* ============ V4: GRID MATRIX ============ */
-  .v4-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; min-width:700px; }
-  .v4-grid .nd { min-height:64px; }
-  .v4-grid .cell { position:relative; }
-  .v4-grid .cell:not(:nth-child(4n))::after { content:'▸'; position:absolute; right:-9px; top:50%;
-    transform:translateY(-50%); color:var(--accent2); z-index:2; }
-
-  /* ============ V5: CENTER SPINE ============ */
-  .v5-wrap { position:relative; padding:0 0; max-width:850px; }
-  .v5-spine { position:absolute; left:50%; transform:translateX(-50%); top:0; bottom:0; width:3px;
-    background:repeating-linear-gradient(180deg,var(--accent2) 0 6px,transparent 6px 12px);
-    animation:dashY .65s linear infinite; }
-  .v5-stage { position:relative; width:46%; margin-bottom:14px; border-radius:10px;
-    border:1.5px solid; padding:9px; background:var(--bg3); }
-  .v5-stage.left { margin-right:54%; }
-  .v5-stage.right { margin-left:54%; }
-  .v5-stage.left::after, .v5-stage.right::before { content:''; position:absolute; top:50%; width:52px; height:3px;
-    background:repeating-linear-gradient(90deg,var(--accent2) 0 5px,transparent 5px 10px);
-    animation:dashX .65s linear infinite; }
-  .v5-stage.left::after { right:-54px; }
-  .v5-stage.right::before { left:-54px; background:repeating-linear-gradient(270deg,var(--accent2) 0 5px,transparent 5px 10px); }
-
-  /* ============ V6: LAYER BARS (swimlanes) ============ */
-  .v6-bar { border:1.5px solid; border-radius:10px; padding:9px 12px; margin-bottom:0; background:var(--bg3); }
-  .v6-chiprow { display:flex; gap:6px; margin-top:7px; flex-wrap:nowrap; }
-  .v6-chiprow .nd { flex:1; font-size:10px; padding:4px 7px; min-width:0; }
-  .v6-arrow { padding:4px 0 4px 40px; }
-
-  /* ============ V7: NUMBERED FLOW GRID ============ */
-  .v7-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
-  .v7-step { position:relative; background:var(--bg3); border:1.5px solid; border-radius:11px; padding:12px 12px 10px 44px; }
-  .v7-step .num { position:absolute; left:10px; top:10px; font-size:21px; font-weight:800; opacity:.85; }
-  .v7-step::after { content:'▸'; position:absolute; right:-11px; top:50%; transform:translateY(-50%);
-    color:var(--accent2); font-size:17px; z-index:2; }
-  .v7-step:last-child::after { display:none; }
-
-  /* ============ V8: MINIMAL PILLS ============ */
-  .v8-flow { display:flex; align-items:center; gap:0; min-width:1050px; justify-content:center; flex-wrap:nowrap; }
-  .v8-pill { border:1.5px solid; border-radius:999px; padding:7px 16px; font-size:12px; font-weight:600;
-    white-space:nowrap; cursor:pointer; background:var(--bg3); transition:transform .2s; }
-  .v8-pill:hover { transform:scale(1.07); }
-  .v8-pill:hover .tip, .tip:hover { opacity:1; }
-  .v8-link { width:56px; height:3px; border-radius:2px; margin:0 -2px;
-    background:repeating-linear-gradient(90deg,var(--accent2) 0 5px,transparent 5px 10px);
-    animation:dashX .6s linear infinite; }
-  .tip { opacity:0; pointer-events:none; transition:opacity .25s; position:relative; }
-
-  .foot-note { text-align:center; color:var(--muted); font-size:13px; margin-top:6px; }
-  @media (max-width:760px){ .v1-row,.v2-flow,.v8-flow{ transform:scale(.55); transform-origin:left top; } }
+  /* theme-specific overrides injected at runtime */
+  #w1 svg .node:hover rect, #w1 svg .node:hover circle, #w1 svg .node:hover polygon { filter:brightness(1.4); }
+  #w2 svg .node:hover rect, #w2 svg .node:hover circle { filter:brightness(1.35) saturate(1.4); }
+  #w4 svg .node:hover ~ * , #w4 svg .node:hover rect { filter:brightness(1.3); }
+  #w7 .mermaid, #w7 .mermaid * { font-family:Consolas, monospace !important; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>🎨 Pipeline Design Samples</h1>
-  <p class="sub">8 layout candidates for the architecture section. Same data, same colors, same animation — different alignment &amp; sizing. Winner gets implemented with click-to-zoom detail popups.</p>
-  <div class="picked-banner" id="banner"></div>
+  <h1>🧪 Mermaid Design Lab — 8 Styles</h1>
+  <p class="sub">One architecture graph · eight visual treatments.
+    <b style="color:#22C55E">Hover any block</b> = detail tooltip ·
+    <b style="color:#22C55E">Click any block</b> = zoom-in popup · click anywhere / Esc = back.
+    All lines are extra-thick for readability. Pick your favorite with ✔.</p>
 
   <!-- V1 -->
   <div class="variant" id="v1">
-    <div class="v-head"><span class="v-num">1</span><div><b>Horizontal Compact</b><br><span class="desc">All 7 stages in one row · small chips · fits container width exactly</span></div><button class="choose-btn" onclick="pick(1)">✔ Choose</button></div>
-    <div class="demo">
-      <div class="v1-row">
-        <div class="v1-col" style="border-color:var(--c-sources)"><div class="stage-label l-src">📡 Sources ×4</div>
-          <div class="nd src"><b>Kafka topic</b><small>SSL native protocol</small></div>
-          <div class="nd src"><b>CSV / Excel</b><small>budget exports</small></div>
-          <div class="nd src"><b>SharePoint</b><small>master sync</small></div>
-          <div class="nd src"><b>Invoices</b><small>OCR extraction</small></div></div>
-        <div class="v1-c"><div class="dash-h arrow-r"></div></div>
-        <div class="v1-col" style="border-color:var(--c-bronze)"><div class="stage-label l-bro">🥉 Bronze Lake</div>
-          <div class="nd bro"><b>Raw JSONL partitions</b><small>dt=… / source=… immutable</small></div>
-          <div class="nd bro"><b>Azure Blob mirror</b><small>ADLS Gen2 optional</small></div></div>
-        <div class="v1-c"><div class="dash-h arrow-r"></div></div>
-        <div class="v1-col" style="border-color:var(--c-silver)"><div class="stage-label l-sil">🥈 Silver</div>
-          <div class="nd sil"><b>Typed · deduplicated</b><small>standardized entities</small></div></div>
-        <div class="v1-c"><div class="dash-h arrow-r"></div></div>
-        <div class="v1-col" style="border-color:var(--c-gold)"><div class="stage-label l-gld">🥇 Gold Star Schema</div>
-          <div class="nd gld"><b>Facts</b><small>transactions · budget</small></div>
-          <div class="nd gld"><b>Dims + KPI</b><small>kpi_monthly_actual_vs_budget</small></div></div>
-        <div class="v1-c"><div class="dash-h arrow-r"></div></div>
-        <div class="v1-col" style="border-color:var(--c-ware)"><div class="stage-label l-war">☁️ Warehouse Sync</div>
-          <div class="nd war"><b>🐘 Neon Postgres</b><small>LIVE · 8 tables</small></div>
-          <div class="nd war"><b>BigQuery Sandbox</b><small>optional</small></div></div>
-        <div class="v1-c"><div class="dash-h arrow-r"></div></div>
-        <div class="col-stack" style="flex:1;display:flex;flex-direction:column;gap:10px;">
-          <div class="nd srv"><span class="stage-label l-srv">📊 Serving / BI</span><b>Power BI · Streamlit portal</b></div>
-          <div class="nd aii"><span class="stage-label l-aii">🤖 AI Agent</span><b>Text-to-SQL · Forecasting</b></div>
-        </div>
-      </div>
-      <p class="foot-note">Best on desktop · densest information · no zoom needed</p>
-    </div>
+    <div class="v-head"><span class="v-num">1</span><div><b>Neon Fluorescent</b><br><span class="desc">Electric cyan/magenta/lime glows on dark · thick 3.5px edges</span></div><button class="choose-btn" onclick="pick(1)">✔ Choose this look</button></div>
+    <p class="hint"><b>Hover = details · Click = zoom popup</b></p>
+    <div class="demo mwrap" id="w1"><pre class="mermaid" data-theme="1"></pre></div>
   </div>
 
   <!-- V2 -->
   <div class="variant" id="v2">
-    <div class="v-head"><span class="v-num">2</span><div><b>Flat Wide Row Cards</b><br><span class="desc">Wide flat cards, chips laid horizontally inside · shortest vertical footprint</span></div><button class="choose-btn" onclick="pick(2)">✔ Choose</button></div>
-    <div class="demo">
-      <div class="v2-flow">
-        <div class="v2-card" style="border-color:var(--c-sources)"><div class="stage-label l-src">📡 Sources</div>
-          <b style="font-size:12px">4 heterogeneous connectors</b>
-          <div class="chipline"><span class="nd src">Kafka SSL</span><span class="nd src">CSV/Excel</span><span class="nd src">SharePoint</span><span class="nd src">OCR invoices</span></div></div>
-        <div class="v1-c"><div class="dash-h arrow-r"></div></div>
-        <div class="v2-card" style="border-color:var(--c-bronze)"><div class="stage-label l-bro">🥉 Bronze</div>
-          <b style="font-size:12px">Raw &amp; immutable</b>
-          <div class="chipline"><span class="nd bro">JSONL dt=/source=</span><span class="nd bro">Azure Blob mirror</span></div></div>
-        <div class="v1-c"><div class="dash-h arrow-r"></div></div>
-        <div class="v2-card" style="border-color:var(--c-silver)"><div class="stage-label l-sil">🥈 Silver</div>
-          <b style="font-size:12px">Standardized</b>
-          <div class="chipline"><span class="nd sil">Typed</span><span class="nd sil">Deduplicated</span><span class="nd sil">DuckDB SQL engine</span></div></div>
-        <div class="v1-c"><div class="dash-h arrow-r"></div></div>
-        <div class="v2-card" style="border-color:var(--c-gold)"><div class="stage-label l-gld">🥇 Gold</div>
-          <b style="font-size:12px">Star schema</b>
-          <div class="chipline"><span class="nd gld">Facts ×2</span><span class="nd gld">Dims ×4</span><span class="nd gld">KPI tables</span></div></div>
-        <div class="v1-c"><div class="dash-h arrow-r"></div></div>
-        <div class="v2-card" style="border-color:var(--c-ware)"><div class="stage-label l-war">☁️ Sync</div>
-          <b style="font-size:12px">Cloud warehouses</b>
-          <div class="chipline"><span class="nd war">Neon LIVE</span><span class="nd war">BigQuery</span></div></div>
-        <div class="v1-c"><div class="dash-h arrow-r"></div></div>
-        <div class="v2-card" style="border-color:var(--c-serve)"><div class="stage-label l-srv">📊 Serve</div>
-          <b style="font-size:12px">BI &amp; apps</b>
-          <div class="chipline"><span class="nd srv">Power BI</span><span class="nd srv">Streamlit</span><span class="nd aii">LLM agent</span></div></div>
-      </div>
-      <p class="foot-note">Shortest height · great above-the-fold · smaller text</p>
-    </div>
+    <div class="v-head"><span class="v-num">2</span><div><b>Cyberpunk Flow</b><br><span class="desc">Hot pink / violet / electric blue · animated dashed data-flow edges</span></div><button class="choose-btn" onclick="pick(2)">✔ Choose this look</button></div>
+    <p class="hint"><b>Hover = details · Click = zoom popup</b></p>
+    <div class="demo mwrap" id="w2"><pre class="mermaid" data-theme="2"></pre></div>
   </div>
 
   <!-- V3 -->
   <div class="variant" id="v3">
-    <div class="v-head"><span class="v-num">3</span><div><b>Vertical Timeline (alternating)</b><br><span class="desc">Top-to-bottom spine · cards alternate left/right · mobile-friendly by nature</span></div><button class="choose-btn" onclick="pick(3)">✔ Choose</button></div>
-    <div class="demo">
-      <div class="v3-wrap">
-        <div class="v3-item left"><div class="nd src"><span class="stage-label l-src">📡 STEP 1 · SOURCES</span><b>Kafka stream · CSV/Excel · SharePoint · OCR invoices</b><small>4 connectors, 4 transports, 4 landing formats</small></div></div>
-        <div class="dash-v"></div>
-        <div class="v3-item right"><div class="nd bro"><span class="stage-label l-bro">🥉 STEP 2 · BRONZE LAKE</span><b>Raw JSONL partitions</b><small>immutable · partitioned by dt/source · Azure Blob mirror</small></div></div>
-        <div class="dash-v"></div>
-        <div class="v3-item left"><div class="nd sil"><span class="stage-label l-sil">🥈 STEP 3 · SILVER</span><b>Typed · deduplicated · standardized</b><small>executed by DuckDB SQL engine</small></div></div>
-        <div class="dash-v"></div>
-        <div class="v3-item right"><div class="nd gld"><span class="stage-label l-gld">🥇 STEP 4 · GOLD STAR SCHEMA</span><b>Facts · Dimensions · KPI layer</b><small>star schema serving BI + LLM</small></div></div>
-        <div class="dash-v"></div>
-        <div class="v3-item left"><div class="nd war"><span class="stage-label l-war">☁️ STEP 5 · CLOUD SYNC</span><b>Neon Postgres (LIVE) · BigQuery Sandbox</b><small>nightly automated warehouse sync</small></div></div>
-        <div class="dash-v"></div>
-        <div class="v3-item right"><div class="nd srv"><span class="stage-label l-srv">📊 STEP 6 · SERVE</span><b>Power BI · Streamlit portal</b></div></div>
-        <div class="dash-v"></div>
-        <div class="v3-item left"><div class="nd aii"><span class="stage-label l-aii">🤖 STEP 7 · AI AGENT</span><b>Text-to-SQL · Forecasting</b></div></div>
-      </div>
-      <p class="foot-note">Most readable text · natural mobile fit · tallest scroll</p>
-    </div>
+    <div class="v-head"><span class="v-num">3</span><div><b>Candy Pop Pastels</b><br><span class="desc">Soft bright pastel fills, dark text · friendly &amp; clean</span></div><button class="choose-btn" onclick="pick(3)">✔ Choose this look</button></div>
+    <p class="hint"><b>Hover = details · Click = zoom popup</b></p>
+    <div class="demo mwrap" id="w3"><pre class="mermaid" data-theme="3"></pre></div>
   </div>
 
   <!-- V4 -->
   <div class="variant" id="v4">
-    <div class="v-head"><span class="v-num">4</span><div><b>Grid Matrix 4×2</b><br><<span class="desc">Compact square grid, reads left→right then wraps · arrows on row ends</span></div><button class="choose-btn" onclick="pick(4)">✔ Choose</button></div>
-    <div class="demo">
-      <div class="v4-grid">
-        <div class="cell"><div class="nd src"><span class="stage-label l-src">📡 SOURCES</span><b>Kafka · CSV · SharePoint · OCR</b><small>4 heterogeneous connectors</small></div></div>
-        <div class="cell"><div class="nd bro"><span class="stage-label l-bro">🥉 BRONZE LAKE</span><b>Raw JSONL partitions</b><small>immutable · partitioned · Blob mirror</small></div></div>
-        <div class="cell"><div class="nd sil"><span class="stage-label l-sil">🥈 SILVER</span><b>Typed · deduplicated</b><small>standardized entities via DuckDB SQL</small></div></div>
-        <div class="cell"><div class="nd gld"><span class="stage-label l-gld">🥇 GOLD STAR SCHEMA</span><b>Star schema</b><small>facts · dims · KPI layer</small></div></div>
-        <div class="cell"><div class="nd war"><span class="stage-label l-war">☁️ WAREHOUSE SYNC</span><b>Neon Postgres LIVE</b><small>+ BigQuery Sandbox optional</small></div></div>
-        <div class="cell"><div class="nd srv"><span class="stage-label l-srv">📊 SERVING / BI</span><b>Power BI · Streamlit</b><small>KPI app · explorer</small></div></div>
-        <div class="cell"><div class="nd aii"><span class="stage-label l-aii">🤖 AI AGENT</span><b>Text-to-SQL · Forecasting</b><small>multi-provider failover router</small></div></div>
-        <div class="cell" style="display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px dashed var(--border);border-radius:8px;color:var(--muted);font-size:11.5px;">⚡ nightly<br>GitHub Actions cron</div>
-      </div>
-      <p class="foot-note">Balanced rectangle · equal cell sizes · compact overall block</p>
-    </div>
+    <div class="v-head"><span class="v-num">4</span><div><b>High-Contrast Bold</b><br><span class="desc">Solid saturated fills, white 3px edges · maximum punch</span></div><button class="choose-btn" onclick="pick(4)">✔ Choose this look</button></div>
+    <p class="hint"><b>Hover = spotlight + details · Click = zoom popup</b></p>
+    <div class="demo mwrap" id="w4"><pre class="mermaid" data-theme="4"></pre></div>
   </div>
 
   <!-- V5 -->
   <div class="variant" id="v5">
-    <div class="v-head"><span class="v-num">5</span><div><b>Center Spine (alternate wings)</b><br><span class="desc">Central animated spine · stages hang left/right like a metro map</span></div><button class="choose-btn" onclick="pick(5)">✔ Choose</button></div>
-    <div class="demo">
-      <div class="v5-wrap">
-        <div class="v5-spine"></div>
-        <div class="v5-stage left" style="border-color:var(--c-sources)"><span class="stage-label l-src">📡 SOURCES</span><b style="font-size:12px">Kafka · CSV/Excel · SharePoint · OCR</b></div>
-        <div class="v5-stage right" style="border-color:var(--c-bronze)"><span class="stage-label l-bro">🥉 BRONZE LAKE</span><b style="font-size:12px">Raw JSONL partitions → Azure Blob</b></div>
-        <div class="v5-stage left" style="border-color:var(--c-silver)"><span class="stage-label l-sil">🥈 SILVER</span><b style="font-size:12px">Typed · deduplicated · DuckDB SQL</b></div>
-        <div class="v5-stage right" style="border-color:var(--c-gold)"><span class="stage-label l-gld">🥇 GOLD STAR SCHEMA</span><b style="font-size:12px">Facts · Dims · KPI layer</b></div>
-        <div class="v5-stage left" style="border-color:var(--c-ware)"><span class="stage-label l-war">☁️ WAREHOUSE SYNC</span><b style="font-size:12px">Neon Postgres LIVE · BigQuery</b></div>
-        <div class="v5-stage right" style="border-color:var(--c-serve)"><span class="stage-label l-srv">📊 SERVING</span><b style="font-size:12px">Power BI · Streamlit portal</b></div>
-        <div class="v5-stage left" style="border-color:var(--c-ai)"><span class="stage-label l-aii">🤖 AI AGENT</span><b style="font-size:12px">Text-to-SQL · Prophet forecasting</b></div>
-      </div>
-      <p class="foot-note">Striking metro-map look · medium height · symmetric</p>
-    </div>
+    <div class="v-head"><span class="v-num">5</span><div><b>Sunset Gradient</b><br><span class="desc">Warm amber → crimson → violet family · top-to-bottom layout</span></div><button class="choose-btn" onclick="pick(5)">✔ Choose this look</button></div>
+    <p class="hint"><b>Hover = details · Click = zoom popup</b></p>
+    <div class="demo mwrap" id="w5"><pre class="mermaid" data-theme="5"></pre></div>
   </div>
 
   <!-- V6 -->
   <div class="variant" id="v6">
-    <div class="v-head"><span class="v-num">6</span><div><b>Layer Swimlanes</b><br><span class="desc">Full-width horizontal bars per layer · chips inside run sideways · arrows down</span></div><button class="choose-btn" onclick="pick(6)">✔ Choose</button></div>
-    <div class="demo">
-      <div class="v6-bar" style="border-color:var(--c-sources)"><span class="stage-label l-src">📡 SOURCES</span>
-        <div class="v6-chiprow"><span class="nd src"><b>Kafka topic SSL</b></span><span class="nd src"><b>CSV/Excel exports</b></span><span class="nd src"><b>SharePoint/Graph</b></span><span class="nd src"><b>Invoices + OCR</b></span></div></div>
-      <div class="v6-arrow"><div class="dash-v arrow-d"></div></div>
-      <div class="v6-bar" style="border-color:var(--c-bronze)"><span class="stage-label l-bro">🥉 BRONZE LAKE</span>
-        <div class="v6-chiprow"><span class="nd bro"><b>Raw JSONL · dt=…/source=…</b></span><span class="nd bro"><b>Azure ADLS Gen2 mirror</b></span></div></div>
-      <div class="v6-arrow"><div class="dash-v arrow-d"></div></div>
-      <div class="v6-bar" style="border-color:var(--c-silver)"><span class="stage-label l-sil">🥈 SILVER</span>
-        <div class="v6-chiprow"><span class="nd sil"><b>Typed casting</b></span><span class="nd sil"><b>Deduped keys</b></span><span class="nd sil"><b>Source lineage kept</b></span></div></div>
-      <div class="v6-arrow"><div class="dash-v arrow-d"></div></div>
-      <div class="v6-bar" style="border-color:var(--c-gold)"><span class="stage-label l-gld">🥇 GOLD STAR SCHEMA</span>
-        <div class="v6-chiprow"><span class="nd gld"><b>fact_transactions</b></span><span class="nd gld"><b>fact_budget</b></span><span class="nd gld"><b>dims ×4</b></span><span class="nd gld"><b>KPI monthly vs budget</b></span><span class="nd gld"><b>monthly_financials</b></span></div></div>
-      <div class="v6-arrow"><div class="dash-v arrow-d"></div></div>
-      <div class="v6-bar" style="border-color:var(--c-ware)"><span class="stage-label l-war">☁️ WAREHOUSE SYNC</span>
-        <div class="v6-chiprow"><span class="nd war"><b>🐘 Neon PostgreSQL — LIVE 8 tables</b></span><span class="nd war"><b>BigQuery Sandbox</b></span><span class="nd war"><b>MotherDuck / MSSQL opt.</b></span></div></div>
-      <div class="v6-arrow"><div class="dash-v arrow-d"></div></div>
-      <div class="v6-bar" style="border-color:var(--c-serve)"><span class="stage-label l-srv">📊 SERVING / BI + 🤖 AI</span>
-        <div class="v6-chiprow"><span class="nd srv"><b>Power BI embed</b></span><span class="nd srv"><b>Streamlit portal</b></span><span class="nd aii"><b>Text-to-SQL agent</b></span><span class="nd aii"><b>Holt-Winters forecast</b></span></div></div>
-      <p class="foot-note">Swimlane feel · every layer readable · medium-tall</p>
-    </div>
+    <div class="v-head"><span class="v-num">6</span><div><b>Minimal Steel</b><br><span class="desc">Professional grayscale steels · single green live-accent · subtle</span></div><button class="choose-btn" onclick="pick(6)">✔ Choose this look</button></div>
+    <p class="hint"><b>Hover = details · Click = zoom popup</b></p>
+    <div class="demo mwrap" id="w6"><pre class="mermaid" data-theme="6"></pre></div>
   </div>
 
   <!-- V7 -->
   <div class="variant" id="v7">
-    <div class="v-head"><span class="v-num">7</span><div><b>Numbered Step Flow (auto-grid)</b><br><span class="desc">Big step numbers · responsive auto-fit cards · flows left→right on any screen size</span></div><button class="choose-btn" onclick="pick(7)">✔ Choose</button></div>
-    <div class="demo">
-      <div class="v7-grid">
-        <div class="v7-step" style="border-color:var(--c-sources)"><span class="num l-src">01</span><span class="stage-label l-src">SOURCES</span><b style="font-size:12.5px">Kafka · CSV · SharePoint · OCR</b><br><small style="color:var(--muted)">4 heterogeneous connectors feed raw events</small></div>
-        <div class="v7-step" style="border-color:var(--c-bronze)"><span class="num l-bro">02</span><span class="stage-label l-bro">BRONZE LAKE</span><b style="font-size:12.5px">Immutable JSONL partitions</b><br><small style="color:var(--muted)">partitioned dt=…/source=… · Blob mirrored</small></div>
-        <div class="v7-step" style="border-color:var(--c-silver)"><span class="num l-sil">03</span><span class="stage-label l-sil">SILVER</span><b style="font-size:12.5px">Typed · deduplicated</b><br><small style="color:var(--muted)">standardized via DuckDB SQL models</small></div>
-        <div class="v7-step" style="border-color:var(--c-gold)"><span class="num l-gld">04</span><span class="stage-label l-gld">GOLD STAR SCHEMA</span><b style="font-size:12.5px">Facts · Dimensions · KPI layer</b><br><small style="color:var(--muted)">BI-ready dimensional model</small></div>
-        <div class="v7-step" style="border-color:var(--c-ware)"><span class="num l-war">05</span><span class="stage-label l-war">WAREHOUSE SYNC</span><b style="font-size:12.5px">Neon Postgres LIVE · BigQuery</b><br><small style="color:var(--muted)">nightly automated sync</small></div>
-        <div class="v7-step" style="border-color:var(--c-serve)"><span class="num l-srv">06</span><span class="stage-label l-srv">SERVING / BI</span><b style="font-size:12.5px">Power BI · Streamlit portal</b><br><small style="color:var(--muted)">public dashboards &amp; explorer</small></div>
-        <div class="v7-step" style="border-color:var(--c-ai)"><span class="num l-aii">07</span><span class="stage-label l-aii">AI ANALYST</span><b style="font-size:12.5px">Text-to-SQL · Forecasting</b><br><small style="color:var(--muted)">4-provider failover router</small></div>
-      </div>
-      <p class="foot-note">Cleanest on mobile · scales to any width automatically · most modern look</p>
-    </div>
+    <div class="v-head"><span class="v-num">7</span><div><b>Retro Terminal</b><br><span class="desc">Matrix green + amber monospace · scanline vibe · hacker aesthetic</span></div><button class="choose-btn" onclick="pick(7)">✔ Choose this look</button></div>
+    <p class="hint"><b>Hover = details · Click = zoom popup</b></p>
+    <div class="demo mwrap" id="w7"><pre class="mermaid" data-theme="7"></pre></div>
   </div>
 
   <!-- V8 -->
-  <<div class="variant" id="v8">
-    <div class="v-head"><span class="v-num">8</span><div><b>Minimal Pill Ribbon</b><br><span class="desc">Ultra-minimal: one ribbon of glowing pills · hover a pill to peek its contents · tiniest footprint ever</span></div><button class="choose-btn" onclick="pick(8)">✔ Choose</button></div>
-    <div class="demo">
-      <p class="foot-note" style="text-align:left;margin-bottom:10px;">👆 Hover any pill to see what flows through it:</p>
-      <div class="v8-flow">
-        <span class="v8-pill" style="border-color:var(--c-sources);color:var(--f-sources)">📡 SOURCES ×4<span class="tip nd src" style="position:absolute;margin-top:8px;z-index:5;">Kafka SSL · CSV/Excel · SharePoint · OCR invoices</span></span>
-        <span class="v8-link"></span>
-        <span class="v8-pill" style="border-color:var(--c-bronze);color:var(--f-bronze)">🥉 BRONZE<span class="tip nd bro" style="position:absolute;margin-top:8px;z-index:5;">Raw JSONL · dt=…/source=… · Azure Blob</span></span>
-        <span class="v8-link"></span>
-        <span class="v8-pill" style="border-color:var(--c-silver);color:var(--f-silver)">🥈 SILVER<span class="tip nd sil" style="position:absolute;margin-top:8px;z-index:5;">Typed · deduplicated · standardized</span></span>
-        <span class="v8-link"></span>
-        <span class="v8-pill" style="border-color:var(--c-gold);color:var(--f-gold)">🥇 GOLD<span class="tip nd gld" style="position:absolute;margin-top:8px;z-index:5;">Facts · Dims · KPI star schema</span></span>
-        <span class="v8-link"></span>
-        <span class="v8-pill" style="border-color:var(--c-ware);color:var(--f-ware)">☁️ WAREHOUSES<span class="tip nd war" style="position:absolute;margin-top:8px;z-index:5;">Neon LIVE · BigQuery · MotherDuck</span></span>
-        <span class="v8-link"></span>
-        <span class="v8-pill" style="border-color:var(--c-serve);color:var(--f-serve)">📊 BI<span class="tip nd srv" style="position:absolute;margin-top:8px;z-index:5;">Power BI · Streamlit portal</span></span>
-        <span class="v8-link"></span>
-        <span class="v8-pill" style="border-color:var(--c-ai);color:var(--f-ai)">🤖 AI<span class="tip nd aii" style="position:absolute;margin-top:8px;z-index:5;">Text-to-SQL · Forecasting agent</span></span>
-      </div>
-      <br><br><br>
-      <p class="foot-note">Smallest possible · elegant · relies on hover (weaker on touch)</p>
-    </div>
-  </div>
-
-  <!-- V9 -->
-  <div class="variant" id="v9">
-    <div class="v-head"><span class="v-num">9</span><div><b>Classic Mermaid Layered Graph (README style)</b><br><span class="desc">The original layered flowchart with color-coded subgraphs · GitHub-style rendering</span></div><button class="choose-btn" onclick="pick(9)">✔ Choose</button></div>
-    <div class="demo">
-      <pre class="mermaid">
-flowchart LR
-  subgraph SRC["📡 DIVERSE SOURCES"]
-    S1["Kafka topic\nSSL native"]
-    S2["CSV / Excel\nbudget exports"]
-    S3["SharePoint / Graph\nmaster data"]
-    S4["Invoices + OCR\nextraction"]
-  end
-  subgraph BRZ["🥉 BRONZE LAKE"]
-    B[("Raw JSONL partitions\ndt=.../source=...\n→ Azure Blob mirror")]
-  end
-  subgraph SLV["🥈 SILVER"]
-    SV["Typed · deduplicated\nstandardized entities\nDuckDB SQL engine"]
-  end
-  subgraph GLD["🥇 GOLD STAR SCHEMA"]
-    F1[("fact_transactions")]
-    F2[("fact_budget")]
-    D1["dim_date · dim_department"]
-    D2["dim_gl_account · dim_vendor"]
-    KPI["kpi_monthly_actual_vs_budget\nmonthly_financials"]
-  end
-  WAR[("☁️ Neon Postgres LIVE\nBigQuery Sandbox")]
-  subgraph SRV["📊 SERVING / BI + 🤖 AI"]
-    PBI["Power BI dashboard"]
-    APP["Streamlit portal"]
-    AGENT["LLM Agent: Text-to-SQL\nProphet forecasting"]
-  end
-  S1 & S2 & S3 & S4 --> BRZ
-  BRZ -->|"11 SQL models"| SLV
-  SLV --> GLD
-  GLD -.->|nightly sync| WAR
-  GLD & WAR --> PBI & AGENT
-  AGENT --> APP
-  PBI --> APP
-
-  classDef srcBox fill:#38BDF81f,stroke:#38BDF8,stroke-width:1.5px,color:#bae6fd
-  classDef broBox fill:#F59E0B1f,stroke:#F59E0B,stroke-width:1.5px,color:#fde68a
-  classDef silBox fill:#94A3B81f,stroke:#94A3B8,stroke-width:1.5px,color:#e2e8f0
-  classDef gldBox fill:#EAB3081f,stroke:#EAB308,stroke-width:1.5px,color:#fef08a
-  classDef warBox fill:#22C55E1f,stroke:#22C55E,stroke-width:1.5px,color:#bbf7d0
-  classDef srvBox fill:#EC48991f,stroke:#EC4899,stroke-width:1.5px,color:#fbcfe8
-
-  class S1,S2,S3,S4 srcBox
-  class B broBox
-  class SV silBox
-  class F1,F2,D1,D2,KPI gldBox
-  class WAR warBox
-  class PBI,APP,AGENT srvBox
-      </pre>
-      <p class="foot-note">The classic layered look from the README · color-coded subgraphs · GitHub-style rendering</p>
-    </div>
+  <div class="variant" id="v8">
+    <div class="v-head"><span class="v-num">8</span><div><b>Aurora Soft-Glow</b><br><span class="desc">Teal/violet/blue aurora palette · soft luminous borders · elegant</span></div><button class="choose-btn" onclick="pick(8)">✔ Choose this look</button></div>
+    <p class="hint"><b>Hover = details · Click = zoom popup</b></p>
+    <div class="demo mwrap" id="w8"><pre class="mermaid" data-theme="8"></pre></div>
   </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<div id="tip"></div>
+<div id="modal">
+  <div class="mcard">
+    <div class="micon" id="modal-icon"></div>
+    <h3 id="modal-title"></h3>
+    <p id="modal-detail"></p>
+    <small>✕ click anywhere outside this card (or press Esc) to go back</small>
+  </div>
+</div>
+
+<a href="./index.html" style="position:fixed;top:12px;left:12px;font-size:13px;z-index:500;">← Back to main site</a>
+
 <script>
+  const GRAPH = `flowchart LR
+    S1["📡 Kafka\\nSSL native"]
+    S2["📁 CSV / Excel"]
+    S3["🏢 SharePoint\\nGraph sync"]
+    S4["🧾 OCR\\ninvoices"]
+    B[("🥉 BRONZE LAKE\\nraw JSONL partitions")]
+    SV["🥈 SILVER\\nstandardized entities"]
+    GLD["🥇 GOLD STAR SCHEMA\\nfacts · dims · KPIs"]
+    WAR[("☁️ WAREHOUSE SYNC\\nNeon Postgres LIVE")]
+    PBI["📊 Power BI\\npublish-to-web"]
+    APP["🖥️ STREAMLIT PORTAL\\nlive app + explorer"]
+    AGENT["🤖 AI AGENT\\nText-to-SQL · forecast"]
+
+    subgraph SRCBOX["SOURCES ×4"]
+      S1
+      S2
+      S3
+      S4
+    end
+
+    S1 & S2 & S3 & S4 ==> B ==> SV ==> GLD
+    GLD -.->|nightly sync| WAR
+    GLD ==> PBI
+    GLD & WAR ==> AGENT ==> APP
+`;
+
+  const THEMES = {
+    '1': { name:'NEON FLUORESCENT',
+      defs:`classDef src fill:#00FFFF1A,stroke:#00FFFF,stroke-width:3px,color:#00FFFF
+        classDef bro fill:#FFB3001A,stroke:#FFB300,stroke-width:3px,color:#FFCC66
+        classDef sil fill:#B4C7DC14,stroke:#DDE7F0,stroke-width:3px,color:#F1F5F9
+        classDef gld fill:#FFE90033,stroke:#FFE900,stroke-width:3px,color:#FFF176
+        classDef war fill:#39FF1433,stroke:#39FF14,stroke-width:3px,color:#8CFF66
+        classDef srv fill:#FF00AA22,stroke:#FF00AA,stroke-width:3px,color:#FF69B4
+        classDef agt fill:#BF5AF233,stroke:#BF5AF2,stroke-width:3px,color:#D8B4FE
+        class S1,S2,S3,S4 src
+        class B bro
+        class SV sil
+        class GLD gld
+        class WAR,PBI,APP war
+        class AGENT agt`,
+      css:`#w1 svg .edgePaths path{stroke:#00E5FF!important;stroke-width:3.5px!important}
+           #w1 svg .node rect,#w1 svg .node circle{filter:drop-shadow(0 0 7px currentColor)}
+           #w1 svg .node:hover rect,#w1 svg .node:hover circle{filter:drop-shadow(0 0 14px currentColor) brightness(1.35)}` },
+
+    '2': { name:'CYBERPUNK FLOW',
+      defs:`classDef src fill:#7209B733,stroke:#F72585,stroke-width:3px,color:#F72585
+        classDef bro fill:#3A0CA333,stroke:#4361EE,stroke-width:3px,color:#4CC9F0
+        classDef sil fill:#4361EE22,stroke:#4CC9F0,stroke-width:3px,color:#4CC9F0
+        classDef gld fill:#B5179E33,stroke:#F72585,stroke-width:3px,color:#FF5DA2
+        classDef war fill:#4361EE33,stroke:#4CC9F0,stroke-width:3px,color:#80FFDB
+        classDef srv fill:#F7258522,stroke:#FF5DA2,stroke-width:3px,color:#FF5DA2
+        classDef agt fill:#3A0CA333,stroke:#B5179E,stroke-width:3px,color:#C77DFF
+        class S1,S2,S3,S4 src
+        class B bro
+        class SV sil
+        class GLD gld
+        class WAR,PBI,APP war
+        class AGENT agt`,
+      css:`#w2 svg .edgePaths path{stroke:#4CC9F0!important;stroke-width:3.5px!important;stroke-dasharray:7 4}
+           #w2 svg .edgePaths path{animation:dashMove2 .7s linear infinite}
+           @keyframes dashMove2{to{stroke-dashoffset:-11}}
+           #w2 svg .node rect,#w2 svg .node circle{filter:drop-shadow(0 0 6px #F7258570)}
+           #w2 svg .node:hover rect{filter:brightness(1.5) drop-shadow(0 0 14px #F72585)}` },
+
+    '3': { name:'CANDY POP PASTELS',
+      defs:`classDef src fill:#A0E7E5,stroke:#0D9488,stroke-width:2.5px,color:#134E4A
+        classDef bro fill:#FFE156,stroke:#B45309,stroke-width:2.5px,color:#78350F
+        classDef sil fill:#E2E8F0,stroke:#64748B,stroke-width:2.5px,color:#334155
+        classDef gld fill:#FFB3C6,stroke:#BE185D,stroke-width:2.5px,color:#831843
+        classDef war fill:#B4F8C8,stroke:#15803D,stroke-width:2.5px,color:#14532D
+        classDef srv fill:#C3B1E1,stroke:#7C3AED,stroke-width:2.5px,color:#4C1D95
+        classDef agt fill:#FBE7C6,stroke:#C2410C,stroke-width:2.5px,color:#7C2D12
+        class S1,S2,S3,S4 src
+        class B bro
+        class SV sil
+        class GLD gld
+        class WAR,PBI,APP war
+        class AGENT agt`,
+      css:`#w3 svg .edgePaths path{stroke:#94A3B8!important;stroke-width:3px!important}
+           #w3 svg .node:hover rect{transform:scale(1.05)}` },
+
+    '4': { name:'HIGH-CONTRAST BOLD',
+      defs:`classDef src fill:#E63946,stroke:#FFFFFF,stroke-width:3px,color:#FFFFFF
+        classDef bro fill:#F77F00,stroke:#FFFFFF,stroke-width:3px,color:#FFFFFF
+        classDef sil fill:#457B9D,stroke:#FFFFFF,stroke-width:3px,color:#FFFFFF
+        classDef gld fill:#2A9D8F,stroke:#FFFFFF,stroke-width:3px,color:#FFFFFF
+        classDef war fill:#264653,stroke:#FFFFFF,stroke-width:3px,color:#FFFFFF
+        classDef srv fill:#8338EC,stroke:#FFFFFF,stroke-width:3px,color:#FFFFFF
+        classDef agt fill:#FF006E,stroke:#FFFFFF,stroke-width:3px,color:#FFFFFF
+        class S1,S2,S3,S4 src
+        class B bro
+        class SV sil
+        class GLD gld
+        class WAR,PBI,APP war
+        class AGENT agt`,
+      css:`#w4 svg .edgePaths path{stroke:#FFFFFF!important;stroke-width:3px!important}
+           #w4 svg .node:hover rect,#w4 svg .node:hover circle{filter:brightness(1.35)}
+           #w4 svg:has(.node:hover) .node:not(:hover){opacity:.38}` },
+
+    '5': { name:'SUNSET GRADIENT',
+      defs:`classDef src fill:#FF9E0022,stroke:#FF9E00,stroke-width:3px,color:#FFC971
+        classDef bro fill:#FF540022,stroke:#FF5400,stroke-width:3px,color:#FF9E71
+        classDef sil fill:#FF005422,stroke:#FF0054,stroke-width:3px,color:#FF6B98
+        classDef gld fill:#9E005933,stroke:#C40070,stroke-width:3px,color:#F53AE0
+        classDef war fill:#39009944,stroke:#7B2CBF,stroke-width:3px,color:#C191FF
+        classDef srv fill:#FF005422,stroke:#FF477E,stroke-width:3px,color:#FF9EB5
+        classDef agt fill:#7B2CBF33,stroke:#9D4EDD,stroke-width:3px,color:#D0A9F7
+        class S1,S2,S3,S4 src
+        class B bro
+        class SV sil
+        class GLD gld
+        class WAR,PBI,APP war
+        class AGENT agt`,
+      css:`#w5 svg .edgePaths path{stroke:#FF9E71!important;stroke-width:3px!important}
+           #w5 svg .node rect,#w5 svg .node circle{filter:drop-shadow(0 0 5px #FF005466)}` },
+
+    '6': { name:'MINIMAL STEEL',
+      defs:`classDef src fill:#37415133,stroke:#6B7280,stroke-width:3px,color:#D1D5DB
+        classDef bro fill:#1F293733,stroke:#9CA3AF,stroke-width:3px,color:#E5E7EB
+        classDef sil fill:#4B556333,stroke:#9CA3AF,stroke-width:3px,color:#F3F4F6
+        classDef gld fill:#11182744,stroke:#EAB308,stroke-width:3px,color:#FDE047
+        classDef war fill:#22C55E22,stroke:#22C55E,stroke-width:3px,color:#86EFAC
+        classDef srv fill:#6B728033,stroke:#D1D5DB,stroke-width:3px,color:#F9FAFB
+        classDef agt fill:#6B728033,stroke:#A5B4FC,stroke-width:3px,color:#C7D2FE
+        class S1,S2,S3,S4 src
+        class B bro
+        class SV sil
+        class GLD gld
+        class WAR,PBI,APP war
+        class AGENT agt`,
+      css:`#w6 svg .edgePaths path{stroke:#9CA3AF!important;stroke-width:3px!important}
+           #w6 svg .war-node rect{filter:drop-shadow(0 0 8px #22C55E55)}` },
+
+    '7': { name:'RETRO TERMINAL',
+      defs:`classDef src fill:#001B00,stroke:#00FF41,stroke-width:3px,color:#00FF41
+        classDef bro fill:#001B00,stroke:#00DD41,stroke-width:3px,color:#00EE44
+        classDef sil fill:#0A140A,stroke:#39FF14,stroke-width:3px,color:#39FF14
+        classDef gld fill:#141000,stroke:#FFB000,stroke-width:3px,color:#FFB000
+        classDef war fill:transparent,stroke:#00FF41,stroke-width:3px,color:#00FF41
+        classDef srv fill:transparent,stroke:#FFB000,stroke-width:3px,color:#FFB000
+        classDef agt fill:transparent,stroke:#00FF41,stroke-width:3px,color:#00FF41
+        class S1,S2,S3,S4 src
+        class B bro
+        class SV sil
+        class GLD gld
+        class WAR,PBI,APP war
+        class AGENT agt`,
+      css:`#w7 svg .edgePaths path{stroke:#00FF41!important;stroke-width:3px!important;stroke-dasharray:6 4;animation:dashT .8s linear infinite}
+           @keyframes dashT{to{stroke-dashoffset:-10}}
+           #w7 svg{background:repeating-linear-gradient(180deg,#0A0F0A 0 2px,#0D120D 2px 4px);border-radius:10px;padding:8px}
+           #w7 svg .node rect,#w7 svg .node circle{filter:drop-shadow(0 0 6px #00FF4166)}` },
+
+    '8': { name:'AURORA SOFT-GLOW',
+      defs:`classDef src fill:#60A5FA22,stroke:#60A5FA,stroke-width:3px,color:#BFDBFE
+        classDef bro fill:#34D39922,stroke:#34D399,stroke-width:3px,color:#6EE7B7
+        classDef sil fill:#94A3B81f,stroke:#CBD5E1,stroke-width:3px,color:#E2E8F0
+        classDef gld fill:#A78BFA22,stroke:#A78BFA,stroke-width:3px,color:#DDD6FE
+        classDef war fill:#34D39922,stroke:#6EE7B7,stroke-width:3px,color:#A7F3D0
+        classDef srv fill:#F472B622,stroke:#F472B6,stroke-width:3px,color:#FBCFE8
+        classDef agt fill:#818CF822,stroke:#818CF8,stroke-width:3px,color:#C7D2FE
+        class S1,S2,S3,S4 src
+        class B bro
+        class SV sil
+        class GLD gld
+        class WAR,PBI,APP war
+        class AGENT agt`,
+      css:`#w8 svg .edgePaths path{stroke:#93C5FD!important;stroke-width:3.5px!important}
+           #w8 svg .node rect,#w8 svg .node circle{filter:drop-shadow(0 0 6px currentColor)}
+           #w8 svg .node:hover rect{filter:drop-shadow(0 0 16px currentColor) brightness(1.25)}` },
+  };
+
+  const DETAILS = {
+    SRC:  ['📡 SOURCES ×4','Four heterogeneous connectors feeding raw events: Kafka streaming over native SSL, finance-team CSV/Excel drops, SharePoint/Graph master-data sync, and OCR-scanned vendor invoices.'],
+    S1:   ['📡 Kafka Topic','Real Apache Kafka topic "finance.transactions" on the Aiven free cluster — native SSL protocol with client certificates, produced & consumed by librdkafka. Falls back to a local file broker offline.'],
+    S2:   ['📁 CSV / Excel Budgets','Finance-team budget workbooks dropped into an incoming folder — schema auto-detected, columns normalized, landed as typed records with source lineage.'],
+    S3:   ['🏢 SharePoint / MS Graph','Department & GL master-data synced through Microsoft Graph client-credentials flow (or local export folders). Deduplicated by natural key.'],
+    S4:   ['🧾 Invoice OCR','Vendor invoice images pass through RapidOCR/Tesseract; regex field extraction pulls invoice number, dates, totals and tax into structured JSON.'],
+    B:    ['🥉 BRONZE LAKE','Immutable raw JSONL partitions laid out as dt=YYYY-MM-DD/source=<channel>. Mirrored to Azure Blob Storage when a connection string is configured. Nothing is ever mutated here.'],
+    SV:   ['🥈 SILVER','Standardized entity tables built by DuckDB SQL models: typed casting, row_number deduplication by natural keys (transaction_id / budget_id), column normalization.'],
+    GLD:  ['🥇 GOLD STAR SCHEMA','BI-ready dimensional model: fact_transactions (31k+ rows), fact_budget, dim_date, dim_department, dim_gl_account, dim_vendor + KPI layer kpi_monthly_actual_vs_budget & monthly_financials. Built from 11 versioned SQL models.'],
+    WAR:  ['☁️ WAREHOUSE SYNC','Nightly push of all gold tables to cloud targets. 🐘 Neon Postgres is LIVE right now (8 tables). BigQuery Sandbox, MotherDuck & Azure SQL auto-skip until configured.'],
+    PBI:  ['📊 POWER BI DASHBOARD','Report authored against the synced gold tables, published publicly via publish-to-web, embedded in the Streamlit portal and linked from this project website.'],
+    APP:  ['🖥️ STREAMLIT PORTAL','The live public app: executive KPI dashboard, interactive data explorer, pipeline operations console and the AI Analyst chat — hosted free on Streamlit Community Cloud.'],
+    AGENT:['🤖 AI ANALYST','Schema-aware Text-to-SQL (SELECT-only guardrails, self-repair loops) plus statistical forecasting behind a rate-limit-proof router: Groq → Gemini → Mistral → OpenRouter. Every answer shows its full router trace.']
+  };
+
+  // inject graph + theme defs into each pre, add per-theme CSS
+  document.querySelectorAll('pre.mermaid').forEach(pre => {
+    const t = THEMES[pre.dataset.theme];
+    pre.textContent = GRAPH + '\n\n' + t.defs;
+    const st = document.createElement('style');
+    st.textContent = t.css;
+    document.head.appendChild(st);
+  });
+
+  mermaid.initialize({ startOnLoad: false, theme: 'dark', flowchart: { curve: 'basis', useMaxWidth: true }, securityLevel: 'loose' });
+  mermaid.run({ querySelector: '.mermaid' }).then(() => {
+
+    // ---------- interactions ----------
+    const tip = document.getElementById('tip');
+    const modal = document.getElementById('modal');
+
+    function showTip(html, e) {
+      tip.innerHTML = html;
+      tip.classList.add('on');
+      moveTip(e);
+    }
+    function moveTip(e) {
+      const pad = 16, w = Math.min(360, innerWidth - 30);
+      let x = e.clientX + pad, y = e.clientY + pad;
+      if (x + w > innerWidth) x = e.clientX - w - pad;
+      if (y + 160 > innerHeight) y = e.clientY - 170;
+      tip.style.left = x + 'px'; tip.style.top = Math.max(8, y) + 'px';
+    }
+    function hideTip() { tip.classList.remove('on'); }
+
+    function openModal(key, themeName) {
+      const [title, detail] = DETAILS[key];
+      document.getElementById('modal-icon').textContent = title.split(' ')[0];
+      document.getElementById('modal-title').textContent = title.replace(/^\S+\s*/, '');
+      document.getElementById('modal-detail').textContent = detail;
+      modal.classList.add('on');
+    }
+    function closeModal() { modal.classList.remove('on'); }
+    modal.addEventListener('click', closeModal);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    document.querySelectorAll('.mwrap').forEach(wrap => {
+      const svg = wrap.querySelector('svg'); if (!svg) return;
+      const themeName = THEMES[wrap.id.slice(1)]?.name || '';
+      svg.querySelectorAll('g.node').forEach(node => {
+        const m = node.id.match(/-(\w+)-\d+$/);
+        const key = m && DETAILS[m[1]] ? m[1] : null;
+        if (!key) return;
+        node.style.cursor = 'pointer';
+        node.addEventListener('mouseenter', e => showTip(
+          `<div class="t-title">${DETAILS[key][0]}</div>${DETAILS[key][1].slice(0, 110)}…`, e));
+        node.addEventListener('mousemove', moveTip);
+        node.addEventListener('mouseleave', hideTip);
+        node.addEventListener('click', ev => { ev.stopPropagation(); openModal(key, themeName); });
+      });
+    });
+  });
+
+  /* selection */
   const saved = localStorage.getItem('pickedVariant');
-  if (saved) {
-    document.getElementById('v' + saved)?.classList.add('chosen');
-    const banner = document.getElementById('banner');
-    banner.style.display = 'block';
-    banner.innerHTML = `Currently marked: <b>Design ${saved}</b>. More will be added if needed — otherwise tell me the winning number!`;
-  }
+  if (saved) { document.getElementById('v' + saved)?.classList.add('chosen'); }
   function pick(n) {
     document.querySelectorAll('.variant').forEach(v => v.classList.remove('chosen'));
-    const el = document.getElementById('v' + n);
-    el.classList.add('chosen');
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('v' + n).classList.add('chosen');
     localStorage.setItem('pickedVariant', n);
-    const banner = document.getElementById('banner');
-    banner.style.display = 'block';
-    banner.innerHTML = `✅ Marked: <b>Design ${n}</b> — now just tell me "design ${n}" and I'll implement it on the real site with clickable zoom-in details.`;
+    alert(`Design ${n} marked ✅\nNow tell me: "design ${n}"`);
   }
 </script>
 
-<script>
-  mermaid.initialize({ startOnLoad: true, theme: 'dark', flowchart: { curve: 'basis' }, themeVariables: { fontSize: '14px' } });
-</script>
-
-<a href="./index.html" style="position:fixed;top:14px;left:14px;font-size:13px;">← Back to main site</a>
 </body>
 </html>
