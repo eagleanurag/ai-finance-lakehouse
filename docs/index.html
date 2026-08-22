@@ -10,99 +10,137 @@
     --bg: #0E1117; --bg2: #161B26; --bg3: #1C2333;
     --accent: #6C8CFF; --accent2: #22C55E;
     --text: #E8EAED; --muted: #9AA3B5; --border: #26304280;
+    --nav-h: 58px;
+    /* pipeline layer palette */
+    --c-src: #3B82F6;   --c-src-bg: #12234d;
+    --c-brz: #F59E0B;   --c-brz-bg: #2b1d04;
+    --c-slv: #94A3B8;   --c-slv-bg: #1b2534;
+    --c-gld: #FACC15;   --c-gld-bg: #291f05;
+    --c-wh:  #4ADE80;   --c-wh-bg: #0c2716;
+    --c-srv: #F472B6;   --c-srv-bg: #2b0f22;
+    --c-agt: #2DD4BF;   --c-agt-bg: #062a26;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6; }
   a { color: var(--accent); text-decoration: none; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-  nav { position: sticky; top: 0; z-index: 50; background: #0e1117ee; backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
-  nav .container { display: flex; align-items: center; gap: 20px; height: 60px; }
-  nav .logo { font-weight: 700; font-size: 17px; }
+  .container { max-width: 1150px; margin: 0 auto; padding: 0 20px; }
+  nav { position: sticky; top: 0; z-index: 100; background: #0e1117f2; backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border); }
+  nav .container { display: flex; align-items: center; gap: 18px; height: var(--nav-h); }
+  nav .logo { font-weight: 700; font-size: 16.5px; white-space: nowrap; }
   nav .logo span { color: var(--accent); }
-  nav a.navlink { color: var(--muted); font-size: 14px; padding: 4px 8px; border-radius: 6px; }
+  .navlinks { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .navlinks::-webkit-scrollbar { display: none; }
+  nav a.navlink { color: var(--muted); font-size: 13.5px; padding: 5px 9px; border-radius: 6px; white-space: nowrap; }
   nav a.navlink:hover { color: var(--text); background: var(--bg3); }
 
-  .hero { padding: 72px 0 48px; text-align: center; background:
-    radial-gradient(600px 300px at 50% 0%, #6c8cff18, transparent), var(--bg); }
-  .hero h1 { font-size: 44px; letter-spacing: -1px; margin-bottom: 14px; line-height: 1.15; }
+  .hero { padding: 64px 0 46px; text-align: center;
+    background: radial-gradient(600px 300px at 50% 0%, #6c8cff18, transparent), var(--bg); }
+  .hero h1 { font-size: clamp(26px, 5vw, 42px); letter-spacing: -0.5px; margin-bottom: 12px; line-height: 1.18; }
   .hero h1 em { color: var(--accent); font-style: normal; }
-  .hero .tagline { font-size: 19px; color: var(--muted); max-width: 780px; margin: 0 auto 18px; font-style: italic; }
-  .typewriter-line { font-family: 'Consolas', monospace; font-size: 21px; color: var(--accent2);
-    min-height: 34px; margin-bottom: 26px; }
-  .typewriter-line .cursor { display: inline-block; width: 10px; background: var(--accent2);
-    animation: blink 1s steps(1) infinite; margin-left: 2px; }
+  .hero .tagline { font-size: clamp(14.5px, 2.2vw, 17.5px); color: var(--muted); max-width: 760px;
+    margin: 0 auto 16px; font-style: italic; }
+  .typewriter-line { font-family: 'Consolas', monospace; font-size: clamp(15px, 2.6vw, 20px);
+    color: var(--accent2); min-height: 30px; margin-bottom: 24px; }
+  .typewriter-line .cursor { display: inline-block; width: 9px; background: var(--accent2);
+    animation: blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
-  .badge-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
-  .badge-row img { height: 28px; border-radius: 4px; transition: transform .15s ease; }
-  .badge-row img:hover { transform: translateY(-3px) scale(1.04); }
-  .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 10px;
-    font-weight: 600; font-size: 15px; transition: transform .15s ease, box-shadow .15s ease; }
-  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px #6c8cff33; }
+  .badge-row { display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; margin-bottom: 26px; }
+  .badge-row img { height: 26px; border-radius: 4px; transition: transform .15s ease; }
+  .badge-row img:hover { transform: translateY(-3px) scale(1.05); }
+  .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 17px; border-radius: 8px;
+    font-weight: 600; font-size: 13.5px; transition: transform .15s ease, box-shadow .15s ease; }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 22px #6c8cff30; }
   .btn.primary { background: var(--accent); color: #fff; }
-  .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.ghost { background: transparent; color: var(--accent); border: 1px solid #6c8cff66; }
 
-  section { padding: 56px 0; border-top: 1px solid var(--border); }
-  h2.section-title { font-size: 27px; margin-bottom: 8px; }
-  p.section-sub { color: var(--muted); margin-bottom: 30px; max-width: 720px; }
-  .reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+  section { padding: 52px 0; border-top: 1px solid var(--border); scroll-margin-top: calc(var(--nav-h) + 14px); }
+  h2.section-title { font-size: clamp(21px, 3.4vw, 26px); margin-bottom: 8px; }
+  p.section-sub { color: var(--muted); margin-bottom: 26px; max-width: 720px; font-size: 14.5px; }
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.visible { opacity: 1; transform: none; }
 
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
   .stat-card { background: linear-gradient(160deg, var(--bg2), var(--bg3)); border: 1px solid var(--border);
-    border-radius: 14px; padding: 20px; text-align: center; transition: border-color .2s; }
+    border-radius: 13px; padding: 18px; text-align: center; transition: border-color .2s; }
   .stat-card:hover { border-color: var(--accent); }
-  .stat-card .num { font-size: 30px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
-  .stat-card .lbl { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .stat-card .num { font-size: 27px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .stat-card .lbl { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
 
-  .diagram-shell { position: relative; background: var(--bg2); border: 1px solid var(--border);
+  /* ---------- architecture diagram ---------- */
+  .diagram-shell { position: relative; background: #0a0d14; border: 1px solid var(--border);
     border-radius: 14px; overflow: hidden; }
-  .diagram-controls { position: absolute; top: 12px; right: 12px; z-index: 10; display: flex;
-    gap: 6px; align-items: center; background: #0e1117dd; border: 1px solid var(--border);
-    border-radius: 8px; padding: 5px 8px; backdrop-filter: blur(6px); }
-  .diagram-controls button { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border);
-    background: var(--bg3); color: var(--text); font-size: 15px; cursor: pointer; transition: background .15s; }
+  .diagram-controls { position: absolute; bottom: 12px; right: 12px; z-index: 20; display: flex;
+    gap: 5px; align-items: center; background: #0e1117e6; border: 1px solid var(--border);
+    border-radius: 8px; padding: 4px 7px; backdrop-filter: blur(6px); }
+  .diagram-controls button { width: 27px; height: 27px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--bg3); color: var(--text); font-size: 13px; cursor: pointer; transition: background .15s; }
   .diagram-controls button:hover { background: var(--accent); color: #fff; }
-  #dia-zoom-label { color: var(--muted); font-size: 12px; min-width: 42px; text-align: center; font-family: monospace; }
-  .mermaid-scroll { overflow: auto; padding: 18px; }
-  .mermaid-scale { transform-origin: top left; transition: transform .25s ease; width: max-content; }
-  .mermaid-hint { color: var(--muted); font-size: 12.5px; margin-top: 10px; text-align: right; padding-right: 8px; }
+  #dia-zoom-label { color: var(--muted); font-size: 11.5px; min-width: 38px; text-align: center; font-family: monospace; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; font-size: 12.5px; color: var(--muted); }
+  .legend b { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+  .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .mermaid-scroll { overflow: auto; max-height: 560px; padding: 14px;
+    background: radial-gradient(800px 400px at 30% 0%, #10182a, #0a0d14); }
+  .mermaid-scale { transform-origin: top left; transition: transform .25s ease; width: max-content; margin: 0 auto; }
+  .mermaid-hint { color: var(--muted); font-size: 12px; margin-top: 10px; }
 
-  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
-  .src-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
-    padding: 20px; transition: transform .2s ease, border-color .2s; }
+  /* animated flowing edges */
+  #dia-scale svg .edgePaths path,
+  #dia-scale svg .flowchart-link { stroke-dasharray: 7 5; animation: dashmove 0.9s linear infinite; }
+  @keyframes dashmove { to { stroke-dashoffset: -12; } }
+  #dia-scale svg .nodeRects rect,
+  #dia-scale svg .basic.label-container { transition: filter .3s; }
+  #dia-scale svg g.node:hover .basic.label-container,
+  #dia-scale svg g.node:hover rect { filter: drop-shadow(0 0 10px rgba(108,140,255,.65)); }
+
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(225px, 1fr)); gap: 14px; }
+  .src-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 13px;
+    padding: 18px; transition: transform .2s ease, border-color .2s; }
   .src-card:hover { transform: translateY(-4px); border-color: var(--accent); }
-  .src-card h3 { font-size: 16px; margin-bottom: 6px; }
-  .src-card .tag { display: inline-block; font-size: 11px; background: #6c8cff22; color: var(--accent);
-    padding: 2px 10px; border-radius: 999px; margin-bottom: 10px; font-family: monospace; }
-  .src-card p { color: var(--muted); font-size: 13.5px; }
+  .src-card h3 { font-size: 15.5px; margin-bottom: 6px; }
+  .src-card .tag { display: inline-block; font-size: 10.5px; background: #6c8cff22; color: var(--accent);
+    padding: 2px 10px; border-radius: 999px; margin-bottom: 9px; font-family: monospace; }
+  .src-card p { color: var(--muted); font-size: 13px; }
 
-  .ai-flow { display: flex; align-items: stretch; gap: 0; justify-content: center; flex-wrap: wrap; }
+  .ai-flow { display: flex; align-items: stretch; justify-content: center; flex-wrap: wrap; gap: 8px 0; }
   .ai-step { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
-    padding: 16px 20px; min-width: 170px; text-align: center; }
-  .ai-step .n { color: var(--accent2); font-weight: 700; font-size: 12px; letter-spacing: 1px; }
-  .ai-step .m { font-family: monospace; font-size: 13px; margin-top: 4px; }
-  .arrow { align-self: center; color: var(--muted); padding: 0 8px; font-size: 20px; }
+    padding: 14px 18px; min-width: 158px; text-align: center; }
+  .ai-step .n { color: var(--accent2); font-weight: 700; font-size: 11.5px; letter-spacing: 1px; }
+  .ai-step .m { font-family: monospace; font-size: 12.5px; margin-top: 4px; }
+  .arrow { align-self: center; color: var(--muted); padding: 0 7px; font-size: 18px; }
 
-  .dict-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .dict-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
   .dict-tab { background: var(--bg2); border: 1px solid var(--border); color: var(--muted);
-    padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+    padding: 6px 15px; border-radius: 8px; cursor: pointer; font-size: 13.5px; }
   .dict-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  table.dict { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--bg2); border-radius: 10px; overflow: hidden; }
-  table.dict th { text-align: left; padding: 10px 14px; background: var(--bg3); color: var(--muted); font-weight: 600; }
-  table.dict td { padding: 8px 14px; border-top: 1px solid var(--border); }
-  table.dict td.t { font-family: monospace; color: var(--accent2); white-space: nowrap; }
-  table.dict td.tbl { font-family: monospace; color: var(--accent); white-space: nowrap; }
+  .table-wrap { max-height: 440px; overflow: auto; border-radius: 10px; border: 1px solid var(--border); }
+  table.dict { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--bg2); }
+  table.dict th { text-align: left; padding: 9px 13px; background: var(--bg3); color: var(--muted);
+    font-weight: 600; position: sticky; top: 0; }
+  table.dict td { padding: 7px 13px; border-top: 1px solid var(--border); white-space: nowrap; }
+  table.dict td.t { font-family: monospace; color: var(--accent2); }
+  table.dict td.tbl { font-family: monospace; color: var(--accent); }
 
-  .status-line { display: flex; gap: 24px; flex-wrap: wrap; color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+  .status-line { display: flex; gap: 22px; flex-wrap: wrap; color: var(--muted); font-size: 13.5px; margin-bottom: 18px; }
   .status-line b { color: var(--text); }
   .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--accent2);
     margin-right: 6px; box-shadow: 0 0 8px var(--accent2); }
-  footer { padding: 40px 0; text-align: center; color: var(--muted); font-size: 13.5px; border-top: 1px solid var(--border); }
-  footer .links { display: flex; gap: 22px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; }
-  .warn { color: #F59E0B; } .ok { color: var(--accent2); }
-  @media (max-width: 640px) { .hero h1 { font-size: 30px; } }
+  footer { padding: 36px 0; text-align: center; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
+  footer .links { display: flex; gap: 20px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .warn { color: #F59E0B; }
+
+  @media (max-width: 700px) {
+    .container { padding: 0 14px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .cards-grid { grid-template-columns: 1fr; }
+    .ai-flow { flex-direction: column; align-items: center; }
+    .arrow { transform: rotate(90deg); padding: 2px 0; }
+    .mermaid-scroll { max-height: 62vh; }
+    .diagram-controls { bottom: auto; top: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -110,11 +148,13 @@
 <nav>
   <div class="container">
     <div class="logo">📊 AI Finance <span>Lakehouse</span></div>
-    <a class="navlink" href="#architecture">Architecture</a>
-    <a class="navlink" href="#sources">Sources</a>
-    <a class="navlink" href="#ai">AI Analyst</a>
-    <a class="navlink" href="#dictionary">Data Dictionary</a>
-    <a class="navlink" href="#status">Pipeline</a>
+    <div class="navlinks">
+      <a class="navlink" href="#architecture">Architecture</a>
+      <a class="navlink" href="#sources">Sources</a>
+      <a class="navlink" href="#ai">AI Analyst</a>
+      <a class="navlink" href="#dictionary">Data Dictionary</a>
+      <a class="navlink" href="#status">Pipeline</a>
+    </div>
   </div>
 </nav>
 
@@ -155,61 +195,97 @@
 
 <section id="architecture">
   <div class="container">
-    <h2 class="section-title reveal">Architecture</h2>
+    <h2 class="section-title reveal">Architecture — Data Flow</h2>
     <p class="section-sub reveal">Four heterogeneous sources land raw events in partitioned bronze storage,
-      are standardized in silver, and modeled into a gold star schema that serves both the BI layer and the LLM agent.
-      Use the controls to zoom into any layer.</p>
+      are standardized in silver, and modeled into a gold star schema serving both BI and the LLM agent.
+      Animated lines = live data movement.</p>
+
+    <div class="legend reveal">
+      <b><i style="background:var(--c-src)"></i>Sources</b>
+      <b><i style="background:var(--c-brz)"></i>Bronze lake</b>
+      <b><i style="background:var(--c-slv)"></i>Silver</b>
+      <b><i style="background:var(--c-gld)"></i>Gold star schema</b>
+      <b><i style="background:var(--c-wh)"></i>Cloud warehouse</b>
+      <b><i style="background:var(--c-srv)"></i>Serving / BI</b>
+      <b><i style="background:var(--c-agt)"></i>AI agent</b>
+    </div>
+
     <div class="diagram-shell reveal">
       <div class="diagram-controls">
         <button onclick="zoomDia(1.25)" title="Zoom in">＋</button>
         <button onclick="zoomDia(0.8)" title="Zoom out">−</button>
-        <button onclick="zoomReset()" title="Reset">⟲</button>
+        <button onclick="zoomReset()" title="Reset view">⟲</button>
+        <button onclick="fitWidth()" title="Fit width">⤢</button>
         <span id="dia-zoom-label">100%</span>
       </div>
       <div class="mermaid-scroll" id="dia-scroll">
         <div class="mermaid-scale" id="dia-scale">
 <pre class="mermaid">
 flowchart LR
-  subgraph SOURCES["DIVERSE SOURCES"]
-    S1["📡 Kafka topic\nfinance.transactions"]
-    S2["📁 CSV/Excel\nbudget exports"]
-    S3["🏢 SharePoint / Graph\nmaster data"]
-    S4["🧾 Invoice images\nOCR extraction"]
+  classDef src fill:#12234d,stroke:#3B82F6,color:#dbeafe,stroke-width:2px
+  classDef brz fill:#2b1d04,stroke:#F59E0B,color:#fef3c7,stroke-width:2px
+  classDef slv fill:#1b2534,stroke:#94A3B8,color:#e2e8f0,stroke-width:2px
+  classDef gld fill:#291f05,stroke:#FACC15,color:#fef9c3,stroke-width:2px
+  classDef wh  fill:#0c2716,stroke:#4ADE80,color:#dcfce7,stroke-width:2px
+  classDef srv fill:#2b0f22,stroke:#F472B6,color:#fae8ff,stroke-width:2px
+  classDef agt fill:#062a26,stroke:#2DD4BF,color:#ccfbf1,stroke-width:3px
+
+  subgraph SRC["📡 SOURCES"]
+    S1["🛰 Kafka topic<br/>finance.transactions"]
+    S2["📁 CSV / Excel<br/>budget exports"]
+    S3["🏢 SharePoint · Graph<br/>master data"]
+    S4["🧾 Invoice images<br/>OCR extraction"]
   end
-  subgraph BRONZE["🥉 BRONZE LAKE"]
-    B[("Raw JSONL partitions\ndt=.../source=...\nlocal dir → Azure Blob")]
+  subgraph BRZ["🥉 BRONZE LAKE"]
+    B[("Raw JSONL partitions<br/>dt=…/source=…<br/>local dir → Azure Blob")]
   end
-  subgraph SILVER["🥈 SILVER"]
-    SV["Typed · deduplicated ·\nstandardized entities"]
+  subgraph SLV["🥈 SILVER"]
+    SV["Typed · deduplicated<br/>standardized entities"]
   end
-  subgraph GOLD["🥇 GOLD STAR SCHEMA"]
+  subgraph GLD["🥇 GOLD STAR SCHEMA"]
     D1["dim_date"]
     D2["dim_department"]
     D3["dim_gl_account"]
     F1[("fact_transactions")]
-    KPI["kpi_monthly_actual_vs_budget"]
+    KPI["kpi_monthly_actual<br/>_vs_budget"]
   end
-  WAREHOUSE[("Neon Postgres /\nBigQuery Sandbox")]
-  subgraph SERVING["SERVING LAYER"]
-    PBI["📊 Power BI\ndashboard"]
-    APP["Streamlit\napp portal"]
-    LLM["🤖 LLM Agent\nText-to-SQL + Prophet forecast"]
+  WH[("☁️ Neon Postgres /<br/>BigQuery Sandbox")]
+  subgraph SRV["🖥 SERVING LAYER"]
+    PBI["📊 Power BI<br/>dashboard"]
+    APP["💠 Streamlit<br/>app portal"]
   end
-  S1 -->|native SSL produce| B
+  AGT["🤖 LLM Agent<br/>Text-to-SQL · Prophet forecast"]
+
+  S1 ==>|native SSL| B
   S2 -->|file drop| B
   S3 -->|sync API| B
   S4 -->|OCR JSON| B
-  B -->|"11 SQL models"| SV --> D1 & D2 & D3 & F1 & KPI
-  D1 & D2 & D3 & F1 & KPI -.->|nightly sync| WAREHOUSE
-  KPI --> PBI
-  F1 & KPI & WAREHOUSE --> LLM
-  LLM --> APP
-  PBI --> APP
+  B ==>|"11 SQL models"| SV
+  SV ==> D1 & D2 & D3 & F1 & KPI
+  D1 & D2 & D3 & F1 & KPI -.->|nightly sync| WH
+  KPI ==> PBI
+  F1 & KPI & WH --> AGT
+  AGT ==> APP
+  PBI ==> APP
+
+  class S1,S2,S3,S4 src
+  class B brz
+  class SV slv
+  class D1,D2,D3,F1,KPI gld
+  class WH wh
+  class PBI,APP srv
+  class AGT agt
+
+  style SRC fill:#0d1830,stroke:#3B82F6,color:#93c5fd
+  style BRZ fill:#1c1204,stroke:#F59E0B,color:#fcd34d
+  style SLV fill:#141c29,stroke:#94A3B8,color:#cbd5e1
+  style GLD fill:#1c1503,stroke:#FACC15,color:#fef08a
+  style SRV fill:#21091a,stroke:#F472B6,color:#fbcfe8
 </pre>
         </div>
       </div>
     </div>
-    <p class="mermaid-hint">💡 Tip: hover nodes for details · scroll inside the box to pan while zoomed</p>
+    <p class="mermaid-hint">💡 Animated dashes = data in motion · drag scrollbars or use ⤢ to fit · hover any node to spotlight it</p>
   </div>
 </section>
 
@@ -219,7 +295,7 @@ flowchart LR
     <p class="section-sub reveal">Four distinct ingestion patterns — each with its own transport, failure modes, and landing format.</p>
     <div class="cards-grid">
       <div class="src-card reveal"><span class="tag">streaming</span><h3>📡 Kafka Transactions</h3>
-        <p>Point-of-sale style events produced to a real managed Apache Kafka 4.1 cluster (Aiven free tier) over SASL_SSL using the native librdkafka client, drained to bronze partitions by the consumer step. Falls back to a local file broker for offline dev.</p></div>
+        <p>Point-of-sale style events produced to a managed Apache Kafka 4.1 cluster (Aiven free tier) over SASL_SSL using the native librdkafka client, drained to bronze partitions by the consumer step. Falls back to a local file broker offline.</p></div>
       <div class="src-card reveal"><span class="tag">batch files</span><h3>📁 Finance CSV/Excel</h3>
         <p>Budget workbooks dropped by the finance team — schema-detected, normalized, and landed as typed records with source lineage preserved.</p></div>
       <div class="src-card reveal"><span class="tag">API sync</span><h3>🏢 SharePoint / MS Graph</h3>
@@ -233,8 +309,8 @@ flowchart LR
 <section id="ai">
   <div class="container">
     <h2 class="section-title reveal">AI Analyst — Rate-Limit Proof by Design</h2>
-    <p class="section-sub reveal">The chatbot routes every prompt through a provider chain. If one free API hits its daily quota,
-      the next takes over automatically — the demo never goes down during recruiter traffic. Every answer ships with its full router trace.</p>
+    <p class="section-sub reveal">Every prompt routes through a provider chain. If one free API hits its daily quota,
+      the next takes over automatically — the demo never dies during recruiter traffic. Every answer ships with its router trace.</p>
     <div class="ai-flow reveal">
       <div class="ai-step"><div class="n">STEP 1</div><div class="m">Groq<br>gpt-oss-120b</div></div>
       <div class="arrow">→</div>
@@ -264,7 +340,7 @@ flowchart LR
       <button class="dict-tab active" onclick="showDict('gold', this)">🥇 Gold (star schema)</button>
       <button class="dict-tab" onclick="showDict('silver', this)">🥈 Silver</button>
     </div>
-    <div style="max-height: 480px; overflow-y: auto; border-radius: 10px;">
+    <div class="table-wrap reveal">
       <table class="dict"><thead><tr><th>Table</th><th>Column</th><th>Type</th></tr></thead>
       <tbody id="dict-body"><tr><td colspan="3" class="warn">Loading…</td></tr></tbody></table>
     </div>
@@ -274,7 +350,7 @@ flowchart LR
 <section id="status">
   <div class="container">
     <h2 class="section-title reveal">Pipeline Status</h2>
-    <p class="section-sub reveal">The nightly GitHub Actions run ingests fresh days of transactions, rebuilds the medallion layers, syncs external warehouses, and refreshes this page's numbers.</p>
+    <p class="section-sub reveal">The nightly GitHub Actions run ingests fresh transactions, rebuilds the medallion layers, syncs external warehouses, and refreshes this page's numbers.</p>
     <div class="status-line reveal" id="pipeline-meta"></div>
     <div class="cards-grid reveal" id="table-counts"></div>
   </div>
@@ -301,10 +377,9 @@ flowchart LR
     "₹0/month cloud cost. Always."
   ];
   let ph = 0, ch = 0, deleting = false;
-  const twEl = document.getElementById('typewriter');
   function typeLoop() {
     const word = PHRASES[ph];
-    twEl.textContent = word.slice(0, ch);
+    document.getElementById('typewriter').textContent = word.slice(0, ch);
     if (!deleting && ch < word.length) { ch++; setTimeout(typeLoop, 45); }
     else if (!deleting) { deleting = true; setTimeout(typeLoop, 1600); }
     else if (ch > 0) { ch--; setTimeout(typeLoop, 22); }
@@ -313,24 +388,38 @@ flowchart LR
   typeLoop();
 
   /* ---------- mermaid ---------- */
-  mermaid.initialize({ startOnLoad: true, theme: 'dark', flowchart: { curve: 'basis' }, themeVariables: { fontSize: '14px' } });
+  mermaid.initialize({
+    startOnLoad: true, theme: 'dark', securityLevel: 'loose',
+    flowchart: { curve: 'basis', useMaxWidth: true, padding: 10, nodeSpacing: 42, rankSpacing: 55 },
+    themeVariables: { fontSize: '15px' }
+  });
 
-  /* ---------- diagram zoom ---------- */
+  /* ---------- zoom + fit ---------- */
   let diaScale = 1;
+  const scroller = () => document.getElementById('dia-scroll');
   function applyScale() {
     document.getElementById('dia-scale').style.transform = `scale(${diaScale})`;
     document.getElementById('dia-zoom-label').textContent = Math.round(diaScale * 100) + '%';
   }
-  function zoomDia(f) {
-    diaScale = Math.min(3, Math.max(0.4, diaScale * f));
+  function zoomDia(f) { diaScale = Math.min(3, Math.max(0.4, diaScale * f)); applyScale(); }
+  function zoomReset() { diaScale = 1; applyScale(); scroller().scrollTo({ top: 0, left: 0 }); }
+  function fitWidth() {
+    const svg = document.querySelector('#dia-scale svg');
+    if (!svg) return;
+    const natW = svg.getBoundingClientRect().width / diaScale;
+    const avail = scroller().clientWidth - 28;
+    diaScale = Math.min(1.8, Math.max(0.4, avail / natW));
     applyScale();
+    scroller().scrollTo({ left: (scroller().scrollWidth - scroller().clientWidth) / 2 });
   }
-  function zoomReset() { diaScale = 1; applyScale(); document.getElementById('dia-scroll').scrollTo({top:0,left:0}); }
+  window.addEventListener('load', () => {
+    setTimeout(() => { try { fitWidth(); } catch (e) {} }, 500);
+  });
 
   /* ---------- scroll reveal ---------- */
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); } });
-  }, { threshold: 0.08 });
+  const io = new IntersectionObserver(es => {
+    es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); } });
+  }, { threshold: 0.07 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
   /* ---------- data ---------- */
@@ -338,7 +427,7 @@ flowchart LR
     try { const r = await fetch(path + '?v=' + Date.now()); if (!r.ok) throw 0; return await r.json(); }
     catch (e) { return null; }
   }
-  function fmt(n) { return n == null ? "—" : n.toLocaleString('en-US'); }
+  function fmt(n) { return n == null ? "—" : Number(n).toLocaleString('en-US'); }
   function showDict(layer, btn) {
     document.querySelectorAll('.dict-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -380,7 +469,7 @@ flowchart LR
       ).join('');
     } else {
       document.getElementById('pipeline-meta').innerHTML =
-        '<span class="warn">⚠ Pipeline has not produced warehouse stats on this deployment yet — check back after the nightly run.</span>';
+        '<span class="warn">⚠ Pipeline has not produced warehouse stats yet — check back after the nightly run.</span>';
     }
 
     try {
