@@ -9,15 +9,6 @@
     --bg: #0E1117; --bg2: #161B26; --bg3: #1C2333;
     --accent: #6C8CFF; --accent2: #22C55E;
     --text: #E8EAED; --muted: #9AA3B5; --border: #26304280;
-
-    --c-sources: #38BDF8;   /* sky */
-    --c-bronze:  #F59E0B;   /* amber */
-    --c-silver:  #94A3B8;   /* slate */
-    --c-gold:    #EAB308;   /* gold */
-    --c-ware:    #22C55E;   /* green */
-    --c-serve:   #EC4899;   /* pink */
-    --c-ai:      #A78BFA;   /* violet */
-
     --nav-h: 56px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -68,67 +59,50 @@
   .stat-card .lbl { color: var(--muted); font-size: 12.5px; margin-top: 3px; }
 
   /* ============================================================
-     CUSTOM ANIMATED PIPELINE (replaces Mermaid)
+     ARCHITECTURE — NEON FLUORESCENT MERMAID w/ ANIMATED FLOW
      ============================================================ */
-  .legend-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin: 0 auto 22px; font-size: 13px; }
+  #arch-shell { position: relative; background: var(--bg2); border: 1.5px solid #00FFFF33;
+    border-radius: 14px; padding: 10px; overflow: hidden;
+    box-shadow: 0 0 34px #00ffff12 inset, 0 0 20px #00e5ff10; }
+  #arch-shell svg { width: 100%; height: auto; display: block; }
+  #arch-shell svg .edgePaths path {
+    stroke: #00E5FF !important; stroke-width: 3px !important;
+    stroke-dasharray: 7 4 !important;
+    animation: archFlow .7s linear infinite;
+  }
+  @keyframes archFlow { to { stroke-dashoffset: -11; } }
+  #arch-shell svg .node rect,
+  #arch-shell svg .node circle,
+  #arch-shell svg .node polygon { filter: drop-shadow(0 0 7px currentColor); transition: filter .25s; }
+  #arch-shell svg .node:hover rect,
+  #arch-shell svg .node:hover circle { filter: drop-shadow(0 0 15px currentColor) brightness(1.35); cursor: pointer; }
+  #arch-shell svg .cluster rect { rx: 12; }
+  .arch-hint { color: var(--muted); font-size: 12.5px; margin-top: 10px; text-align: center; }
+  .arch-hint b { color: #00E5FF; }
+
+  .legend-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin: 0 auto 18px; font-size: 13px; }
   .legend-item { display: flex; align-items: center; gap: 6px; color: var(--muted); }
   .legend-dot { width: 11px; height: 11px; border-radius: 50%; }
 
-  .pipeline { display: flex; align-items: stretch; justify-content: center; gap: 0; width: 100%; }
-  .p-stage { flex: 1 1 0; min-width: 0; border-radius: 14px; border: 1.5px solid; padding: 14px 14px 12px;
-    background: var(--bg2); position: relative; transition: transform .25s ease, box-shadow .25s ease; }
-  .p-stage:hover { transform: translateY(-4px); z-index: 3; }
-  .p-stage .p-head { font-weight: 700; font-size: 13.5px; letter-spacing: .4px; text-transform: uppercase;
-    margin-bottom: 3px; display: flex; align-items: center; gap: 7px; }
-  .p-stage .p-sub { color: var(--muted); font-size: 11.5px; margin-bottom: 10px; }
-  .p-chip { display: block; background: var(--bg3); border-radius: 8px; padding: 7px 10px; font-size: 12.3px;
-    margin-bottom: 6px; border-left: 3px solid currentColor; }
-  .p-chip b { font-weight: 600; }
-  .p-chip small { color: var(--muted); display: block; font-size: 10.8px; line-height: 1.35; }
+  /* ---------- TOOLTIP ---------- */
+  #tip { position: fixed; z-index: 9999; max-width: 340px; background:#1C2333F5; border:1.5px solid #00E5FF;
+    color:var(--text); font-size:13px; line-height:1.45; padding:11px 14px; border-radius:10px;
+    box-shadow:0 10px 34px #000000A0; pointer-events:none; opacity:0; transition:opacity .15s; backdrop-filter:blur(6px); }
+  #tip.on { opacity:1; }
+  #tip .t-title { font-weight:700; margin-bottom:3px; }
 
-  .p-sources  { border-color: var(--c-sources); box-shadow: 0 0 0 1px #38bdf822, 0 0 26px #38bdf814; }
-  .p-sources .p-head { color: var(--c-sources); }
-  .p-bronze   { border-color: var(--c-bronze);  box-shadow: 0 0 0 1px #f59e0b22, 0 0 26px #f59e0b14; }
-  .p-bronze .p-head { color: var(--c-bronze); }
-  .p-silver   { border-color: var(--c-silver);  box-shadow: 0 0 0 1px #94a3b822; }
-  .p-silver .p-head { color: var(--c-silver); }
-  .p-gold     { border-color: var(--c-gold);    box-shadow: 0 0 0 1px #eab30822, 0 0 26px #eab30814; }
-  .p-gold .p-head { color: var(--c-gold); }
-  .p-ware     { border-color: var(--c-ware);    box-shadow: 0 0 0 1px #22c55e22, 0 0 26px #22c55e14; }
-  .p-ware .p-head { color: var(--c-ware); }
-  .p-serve    { border-color: var(--c-serve);   box-shadow: 0 0 0 1px #ec489922, 0 0 26px #ec489914; }
-  .p-serve .p-head { color: var(--c-serve); }
-  .p-ai       { border-color: var(--c-ai);      box-shadow: 0 0 0 1px #a78bfa22, 0 0 26px #a78bfa14; }
-  .p-ai .p-head { color: var(--c-ai); }
-
-  .p-chip.sources { border-color: var(--c-sources); color: #bae6fd; }
-  .p-chip.bronze  { border-color: var(--c-bronze);  color: #fde68a; }
-  .p-chip.silver  { border-color: var(--c-silver);  color: #e2e8f0; }
-  .p-chip.gold    { border-color: var(--c-gold);    color: #fef08a; }
-  .p-chip.ware    { border-color: var(--c-ware);    color: #bbf7d0; }
-  .p-chip.serve   { border-color: var(--c-serve);   color: #fbcfe8; }
-  .p-chip.ai      { border-color: var(--c-ai);      color: #ddd6fe; }
-
-  /* animated connectors */
-  .connector { flex: 0 0 58px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 46px; position: relative; }
-  .connector .line { width: 100%; height: 3px; border-radius: 2px;
-    background: repeating-linear-gradient(90deg, var(--accent2) 0 7px, transparent 7px 14px);
-    animation: flowX .7s linear infinite; }
-  @keyframes flowX { from { background-position-x: 0; } to { background-position-x: 14px; } }
-  .connector::after { content: '▸'; color: var(--accent2); font-size: 17px; line-height: 1; margin-top: -3px; }
-  .connector .flow-tag { position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
-    font-size: 10px; color: var(--muted); white-space: nowrap; font-family: monospace; }
-
-  .col-stack { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
-  .vconnector { height: 34px; display: flex; flex-direction: row; justify-content: center; align-items: center; position: relative; }
-  .vconnector::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 14px; width: 3px; border-radius: 2px;
-    background: repeating-linear-gradient(180deg, var(--accent2) 0 7px, transparent 7px 14px);
-    animation: flowY .7s linear infinite; }
-  @keyframes flowY { from { background-position-y: 0; } to { background-position-y: 14px; } }
-  .vconnector::after { content: '▼'; color: var(--accent2); font-size: 13px; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); }
-
-  .pulse { animation: pulseGlow 2.6s ease-in-out infinite; }
-  @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 0 0 #ffffff00; } 50% { box-shadow: 0 0 22px 1px currentColor; } }
+  /* ---------- MODAL ---------- */
+  #modal { position:fixed; inset:0; z-index:10000; background:#05070CE6; display:none;
+    align-items:center; justify-content:center; backdrop-filter:blur(4px); cursor:zoom-out; }
+  #modal.on { display:flex; }
+  .mcard { max-width:520px; width:calc(100% - 40px); background:linear-gradient(160deg,var(--bg2),var(--bg3));
+    border:2px solid #00FFFF; border-radius:18px; padding:28px 26px; box-shadow:0 20px 80px #000C, 0 0 40px #00FFFF22;
+    animation:popIn .25s ease; cursor:default; }
+  @keyframes popIn { from { transform:scale(.85); opacity:0; } to { transform:none; opacity:1; } }
+  .mcard .micon { font-size:44px; margin-bottom:10px; }
+  .mcard h3 { font-size:21px; margin-bottom:10px; }
+  .mcard p { color:var(--muted); font-size:15px; line-height:1.65; }
+  .mcard small { display:block; margin-top:16px; color:var(--accent2); font-size:12px; }
 
   /* ---------- AI flow steps ---------- */
   .ai-flow { display: flex; align-items: stretch; gap: 0; justify-content: center; flex-wrap: wrap; }
@@ -166,16 +140,8 @@
   footer .links { display: flex; gap: 20px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
   .warn { color: #F59E0B; }
 
-  /* ---------- MOBILE ---------- */
-  @media (max-width: 940px) {
-    .pipeline { flex-direction: column; align-items: stretch; }
-    .connector { flex: 0 0 44px; }
-    .connector .line { width: 3px; height: 26px; margin: 0 auto;
-      background: repeating-linear-gradient(180deg, var(--accent2) 0 7px, transparent 7px 14px);
-      animation-name: flowY; }
-    .connector::after { content: '▼'; margin: -2px 0 0 0; }
-    .connector .flow-tag { top: 50%; left: auto; right: 12px; transform: translateY(-50%); }
-    .col-stack .vconnector { display: none; }
+  @media (max-width: 700px) {
+    .legend-row { gap: 10px; }
   }
 </style>
 </head>
@@ -229,91 +195,24 @@
 
 <section id="architecture">
   <div class="container">
-    <h2 class="section-title reveal">Architecture — Data Flow</h2>
+    <h2 class="section-title reveal">Architecture — Live Data Flow</h2>
     <p class="section-sub reveal">Four heterogeneous sources land raw events in partitioned bronze storage, are standardized in silver,
-      and modeled into a gold star schema serving both BI and the LLM agent. <b style="color:#22C55E">Animated dashes = live data movement.</b></p>
+      and modeled into a gold star schema serving both BI and the LLM agent. <b style="color:#00E5FF">Animated neon dashes = data in motion.</b></p>
 
     <div class="legend-row reveal">
-      <span class="legend-item"><span class="legend-dot" style="background:var(--c-sources)"></span>Sources</span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--c-bronze)"></span>Bronze lake</span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--c-silver)"></span>Silver</span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--c-gold)"></span>Gold star schema</span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--c-ware)"></span>Cloud warehouse</span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--c-serve)"></span>Serving / BI</span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--c-ai)"></span>AI agent</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#00FFFF"></span>Sources</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#FFB300"></span>Bronze lake</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#DDE7F0"></span>Silver</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#FFE900"></span>Gold star schema</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#39FF14"></span>Cloud warehouse · app</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#FF00AA"></span>Serving / BI</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#BF5AF2"></span>AI agent</span>
     </div>
 
-    <!-- ================= ANIMATED PIPELINE ================= -->
-    <div class="pipeline reveal">
-
-      <div class="p-stage p-sources">
-        <div class="p-head">📡 Sources</div>
-        <div class="p-sub">4 heterogeneous connectors</div>
-        <div class="p-chip sources"><b>📡 Kafka topic</b><small>finance.transactions — native SSL produce/consume (Aiven)</small></div>
-        <div class="p-chip sources"><b>📁 CSV / Excel</b><small>budget exports — schema-detected</small></div>
-        <div class="p-chip sources"><b>🏢 SharePoint / Graph</b><small>master-data sync</small></div>
-        <div class="p-chip sources"><b>🧾 Invoice images</b><small>RapidOCR / Tesseract extraction</small></div>
-      </div>
-
-      <div class="connector"><span class="flow-tag">produce · drop · sync</span><span class="line"></span></div>
-
-      <div class="p-stage p-bronze">
-        <div class="p-head">🥉 Bronze Lake</div>
-        <div class="p-sub">raw · immutable · partitioned</div>
-        <div class="p-chip bronze"><b>Raw JSONL partitions</b><small>dt=YYYY-MM-DD / source=&lt;channel&gt;</small></div>
-        <div class="p-chip bronze"><b>Local lake dir → Azure Blob</b><small>ADLS Gen2 mirror when configured</small></div>
-      </div>
-
-      <div class="connector"><span class="flow-tag">land</span><span class="line"></span></div>
-
-      <div class="p-stage p-silver">
-        <div class="p-head">🥈 Silver</div>
-        <div class="p-sub">standardized entities</div>
-        <div class="p-chip silver"><b>Typed &amp; deduplicated</b><small>row_number dedupe by natural keys</small></div>
-        <div class="p-chip silver"><b>DuckDB SQL engine</b><small>silver_transactions · budgets · invoices</small></div>
-      </div>
-
-      <div class="connector"><span class="flow-tag">transform ×11</span><span class="line"></span></div>
-
-      <div class="p-stage p-gold">
-        <div class="p-head">🥇 Gold Star Schema</div>
-        <n class="p-sub">BI-ready dimensional model</n>
-        <div class="p-chip gold"><b>Facts</b><small>fact_transactions · fact_budget</small></div>
-        <div class="p-chip gold"><b>Dimensions</b><small>dim_date · department · gl_account · vendor</small></div>
-        <div. class="p-chip gold"><b>KPI layer</b><small>kpi_monthly_actual_vs_budget · monthly_financials</small></div.>
-      </div>
-
-      <div class="connector"><span class="flow-tag">nightly sync</span><span class="line"></span></div>
-
-      <div class="p-stage p-ware">
-        <div class="p-head">☁️ Cloud Warehouse</div>
-        <div class="p-sub">external sync targets</div>
-        <div class="p-chip ware"><b>🐘 Neon PostgreSQL</b><i style="color:#86efac">● LIVE — 8 tables synced</i></div>
-        <div class="p-chip ware"><b>BigQuery Sandbox</b><small>auto-skips when unconfigured</small></div>
-      </div>
-
-      <div class="connector"><span class="flow-tag">serve</span><span class="line"></span></div>
-
-      <div class="col-stack">
-        <div class="p-stage p-serve pulse" style="color:var(--c-serve)">
-          <div class="p-head">📊 Serving / BI</div>
-          <div class="p-chip serve"><b>Power BI dashboard</b><small>publish-to-web embed</small></div>
-          <div class="p-chip serve"><b>🖥️ Streamlit portal</b><small>KPI app · data explorer</small></div>
-        </div>
-        <div class="vconnector"></div>
-        <div class="p-stage p-ai">
-          <div class="p-head">🤖 LLM Agent</div>
-          <div class="p-chip ai"><b>Text-to-SQL</b><small>schema-aware · SELECT-only · self-repair</small></div>
-          <div. class="p-chip ai"><b>Forecasting</b><small>Holt-Winters damped · Prophet optional</small></div.>
-        </div>
-      </div>
-
+    <div id="arch-shell" class="reveal mwrap">
+      <pre class="mermaid" id="arch-mermaid"></pre>
     </div>
-    <!-- ================================================ -->
-    <br>
-    <p class="reveal" style="color:var(--muted);font-size:13px;text-align:center;">
-      💡 <b style="color:#22C55E">Green dashes</b> = live data movement between layers · hover any stage to spotlight it · stacks vertically on mobile
-    </p>
+    <p class="arch-hint reveal">💡 <b>Hover any block</b> for details · <b>click any block</b> to open its zoom card · click anywhere to close · green/cyan dashes = live data movement</p>
   </div>
 </section>
 
@@ -323,7 +222,7 @@
     <p class="section-sub reveal">Four distinct ingestion patterns — each with its own transport, failure modes, and landing format.</p>
     <div class="cards-grid">
       <div class="src-card reveal"><span class="tag">streaming</span><h3>📡 Kafka Transactions</h3>
-        <p>Point-of-sale style events produced to a real managed Apache Kafka cluster (Aiven free tier) over SASL_SSL using the native librdkafka client, drained to bronze partitions by the consumer step. Falls back to a local file broker for offline dev.</p></div>
+        <p>Point-of-sale style events produced to a real managed Apache Kafka cluster (Aiven free tier) over SSL using the native librdkafka client, drained to bronze partitions by the consumer step. Falls back to a local file broker for offline dev.</p></div>
       <div class="src-card reveal"><span class="tag">batch files</span><h3>📁 Finance CSV/Excel</h3>
         <p>Budget workbooks dropped by the finance team — schema-detected, normalized, and landed as typed records with source lineage preserved.</p></div>
       <div class="src-card reveal"><span class="tag">API sync</span><h3>🏢 SharePoint / MS Graph</h3>
@@ -393,7 +292,19 @@
   Built by <b>eagleanurag</b> · Kafka · DuckDB · Postgres · BigQuery · Streamlit · Groq/Gemini/Mistral/OpenRouter · $0 cloud cost
 </footer>
 
+<div id="tip"></div>
+<div id="modal">
+  <div class="mcard">
+    <div class="micon" id="modal-icon"></div>
+    <h3 id="modal-title"></h3>
+    <p id="modal-detail"></p>
+    <small>✕ click anywhere outside this card (or press Esc) to go back</small>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
 <script>
+  /* ---------- typewriter ---------- */
   const PHRASES = [
     "Streaming transactions through Kafka...",
     "Transforming bronze → silver → gold...",
@@ -414,6 +325,110 @@
   }
   typeLoop();
 
+  /* ---------- NEON ARCHITECTURE MERMAID ---------- */
+  const ARCH_GRAPH = `flowchart LR
+    S1["📡 Kafka topic\\nSSL native"]
+    S2["📁 CSV / Excel\\nbudget exports"]
+    S3["🏢 SharePoint\\nGraph sync"]
+    S4["🧾 OCR invoices"]
+    B[("🥉 BRONZE LAKE\\nraw JSONL partitions")]
+    SV["🥈 SILVER\\nstandardized entities"]
+    GLD["🥇 GOLD STAR SCHEMA\\nfacts · dims · KPIs"]
+    WAR[("☁️ WAREHOUSE SYNC\\nNeon Postgres LIVE")]
+    PBI["📊 POWER BI\\npublish-to-web"]
+    APP["🖥️ STREAMLIT PORTAL\\nlive app + explorer"]
+    AGENT["🤖 AI AGENT\\nText-to-SQL · forecast"]
+
+    subgraph SRCBOX["SOURCES ×4"]
+      S1
+      S2
+      S3
+      S4
+    end
+
+    S1 & S2 & S3 & S4 ==> B ==> SV ==> GLD
+    GLD -.->|nightly sync| WAR
+    GLD ==> PBI
+    GLD & WAR ==> AGENT ==> APP
+`;
+
+  const ARCH_DEFS = `
+    classDef src fill:#00FFFF1A,stroke:#00FFFF,stroke-width:3px,color:#00FFFF
+    classDef bro fill:#FFB3001A,stroke:#FFB300,stroke-width:3px,color:#FFCC66
+    classDef sil fill:#B4C7DC14,stroke:#DDE7F0,stroke-width:3px,color:#F1F5F9
+    classDef gld fill:#FFE90033,stroke:#FFE900,stroke-width:3px,color:#FFF176
+    classDef war fill:#39FF1433,stroke:#39FF14,stroke-width:3px,color:#8CFF66
+    classDef srv fill:#FF00AA22,stroke:#FF00AA,stroke-width:3px,color:#FF69B4
+    classDef agt fill:#BF5AF233,stroke:#BF5AF2,stroke-width:3px,color:#D8B4FE
+    class S1,S2,S3,S4 src
+    class B bro
+    class SV sil
+    class GLD gld
+    class WAR,PBI,APP war
+    class AGENT agt`;
+
+  document.getElementById('arch-mermaid').textContent = ARCH_GRAPH + '\n' + ARCH_DEFS;
+
+  const DETAILS = {
+    SRC:  ['📡 SOURCES ×4','Four heterogeneous connectors feeding raw events: Kafka streaming over native SSL, finance-team CSV/Excel drops, SharePoint/Graph master-data sync, and OCR-scanned vendor invoices.'],
+    S1:   ['📡 Kafka Topic','Real Apache Kafka topic "finance.transactions" on the Aiven free cluster — native SSL protocol with client certificates, produced & consumed by librdkafka. Falls back to a local file broker offline.'],
+    S2:   ['📁 CSV / Excel Budgets','Finance-team budget workbooks dropped into an incoming folder — schema auto-detected, columns normalized, landed as typed records with source lineage.'],
+    S3:   ['🏢 SharePoint / MS Graph','Department & GL master-data synced through Microsoft Graph client-credentials flow (or local export folders). Deduplicated by natural key.'],
+    S4:   ['🧾 Invoice OCR','Vendor invoice images pass through RapidOCR/Tesseract; regex field extraction pulls invoice number, dates, totals and tax into structured JSON.'],
+    B:    ['🥉 BRONZE LAKE','Immutable raw JSONL partitions laid out as dt=YYYY-MM-DD/source=<channel>. Mirrored to Azure Blob Storage when a connection string is configured. Nothing is ever mutated here.'],
+    SV:   ['🥈 SILVER','Standardized entity tables built by DuckDB SQL models: typed casting, row_number deduplication by natural keys (transaction_id / budget_id), column normalization.'],
+    GLD:  ['🥇 GOLD STAR SCHEMA','BI-ready dimensional model: fact_transactions (11k+ rows), fact_budget, dim_date, dim_department, dim_gl_account, dim_vendor + KPI layer kpi_monthly_actual_vs_budget & monthly_financials. Built from 11 versioned SQL models.'],
+    WAR:  ['☁️ WAREHOUSE SYNC','Nightly push of all gold tables to cloud targets. 🐘 Neon Postgres is LIVE right now (8 tables). BigQuery Sandbox, MotherDuck & Azure SQL auto-skip until configured.'],
+    PBI:  ['📊 POWER BI DASHBOARD','Report authored against the synced gold tables, published publicly via publish-to-web, embedded in the Streamlit portal and linked from this project website.'],
+    APP:  ['🖥️ STREAMLIT PORTAL','The live public app: executive KPI dashboard, interactive data explorer, pipeline operations console and the AI Analyst chat — hosted free on Streamlit Community Cloud.'],
+    AGENT:['🤖 AI ANALYST','Schema-aware Text-to-SQL (SELECT-only guardrails, self-repair loops) plus statistical forecasting behind a rate-limit-proof router: Groq → Gemini → Mistral → OpenRouter. Every answer shows its full router trace.']
+  };
+
+  const tip = document.getElementById('tip');
+  const modal = document.getElementById('modal');
+
+  function showTip(html, e) {
+    tip.innerHTML = html;
+    tip.classList.add('on');
+    moveTip(e);
+  }
+  function moveTip(e) {
+    const pad = 16, w = Math.min(360, innerWidth - 30);
+    let x = e.clientX + pad, y = e.clientY + pad;
+    if (x + w > innerWidth) x = e.clientX - w - pad;
+    if (y + 160 > innerHeight) y = e.clientY - 170;
+    tip.style.left = x + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  function hideTip() { tip.classList.remove('on'); }
+  function openModal(key) {
+    const [title, detail] = DETAILS[key];
+    document.getElementById('modal-icon').textContent = title.split(' ')[0];
+    document.getElementById('modal-title').textContent = title.replace(/^\S+\s*/, '');
+    document.getElementById('modal-detail').textContent = detail;
+    modal.classList.add('on');
+  }
+  function closeModal() { modal.classList.remove('on'); }
+  modal.addEventListener('click', closeModal);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  mermaid.initialize({ startOnLoad: false, theme: 'dark', flowchart: { curve: 'basis', useMaxWidth: true }, securityLevel: 'loose' });
+  mermaid.run({ querySelector: '#arch-mermaid' }).then(() => {
+    const shell = document.getElementById('arch-shell');
+    const svg = shell.querySelector('svg'); if (!svg) return;
+    svg.querySelectorAll('g.node').forEach(node => {
+      const m = node.id.match(/-(\w+)-\d+$/);
+      const key = m && DETAILS[m[1]] ? m[1] : null;
+      if (!key) return;
+      node.style.cursor = 'pointer';
+      node.addEventListener('mouseenter', e => showTip(
+        `<div class="t-title">${DETAILS[key][0]}</div>${DETAILS[key][1].slice(0, 110)}…`, e));
+      node.addEventListener('mousemove', moveTip);
+      node.addEventListener('mouseleave', hideTip);
+      node.addEventListener('click', ev => { ev.stopPropagation(); openModal(key); });
+    });
+  });
+
+  /* ---------- data ---------- */
   async function loadJSON(path) {
     try { const r = await fetch(path + '?v=' + Date.now()); if (!r.ok) throw 0; return await r.json(); }
     catch (e) { return null; }
