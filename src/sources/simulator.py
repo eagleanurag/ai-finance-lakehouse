@@ -708,6 +708,25 @@ class FinanceDataGenerator:
         })
         return pd.concat([df, df.sample(frac=0.05, random_state=7)], ignore_index=True)
 
+    def _stream_event(self, rng: np.random.Generator, ts: datetime, producer: str) -> dict[str, Any]:
+        exp = rng.random() < 0.7
+        di = rng.choice(len(self.dept_codes), p=self.dept_expense_p if exp else self.dept_revenue_p)
+        ai = rng.choice(self.dept_acct_idx[di], p=self.dept_acct_p[di]) if exp else rng.choice(self.rev_acct_idx, p=self.rev_acct_p)
+        vi = rng.choice(self.n_vendors, p=self.vendor_p) if exp else None
+        ci = None if exp else rng.choice(self.n_customers, p=self.customer_p)
+        payload = {
+            "transaction_id": "KS" + uuid.uuid4().hex[:14], "event_ts": ts.isoformat().replace("+00:00", "Z"),
+            "dept_code": self.dept_codes[di], "account_code": self.account_codes[ai],
+            "vendor_id": None if vi is None else self.vendors["vendor_id"].iat[vi],
+            "vendor_name": None if vi is None else self.vendors["vendor_name"].iat[vi],
+            "customer_id": None if ci is None else self.customers["customer_id"].iat[ci],
+            "amount": round(float(self.account_base[ai] * np.exp(rng.normal(-0.18, 0.6))), 2),
+            "currency": "USD", "txn_type": "expense" if exp else "revenue",
+            "op": "I", "event_version": 1, "ingested_at": datetime.now(timezone.utc).isoformat(),
+        }
+        return {"headers": {"producer": producer, "schema_version": 2, "message_id": uuid.uuid4().hex[:12]},
+                "payload": payload}
+
     def stream_events(self, days: int, per_day: int) -> list[dict[str, Any]]:
         """Fresh events for the live Kafka topic (same envelope as the replay files, ~2% redelivered)."""
         rng = np.random.default_rng()
@@ -715,26 +734,17 @@ class FinanceDataGenerator:
         for offset in range(days):
             d = self.end_date - timedelta(days=offset)
             for _ in range(per_day):
-                exp = rng.random() < 0.7
-                di = rng.choice(len(self.dept_codes), p=self.dept_expense_p if exp else self.dept_revenue_p)
-                ai = rng.choice(self.dept_acct_idx[di], p=self.dept_acct_p[di]) if exp else rng.choice(self.rev_acct_idx, p=self.rev_acct_p)
-                vi = rng.choice(self.n_vendors, p=self.vendor_p) if exp else None
-                ci = None if exp else rng.choice(self.n_customers, p=self.customer_p)
                 ts = datetime(d.year, d.month, d.day, int(rng.integers(6, 22)), int(rng.integers(0, 60)), tzinfo=timezone.utc)
-                payload = {
-                    "transaction_id": "KS" + uuid.uuid4().hex[:14], "event_ts": ts.isoformat().replace("+00:00", "Z"),
-                    "dept_code": self.dept_codes[di], "account_code": self.account_codes[ai],
-                    "vendor_id": None if vi is None else self.vendors["vendor_id"].iat[vi],
-                    "vendor_name": None if vi is None else self.vendors["vendor_name"].iat[vi],
-                    "customer_id": None if ci is None else self.customers["customer_id"].iat[ci],
-                    "amount": round(float(self.account_base[ai] * np.exp(rng.normal(-0.18, 0.6))), 2),
-                    "currency": "USD", "txn_type": "expense" if exp else "revenue",
-                    "op": "I", "event_version": 1, "ingested_at": datetime.now(timezone.utc).isoformat(),
-                }
-                events.append({"headers": {"producer": "live-stream", "schema_version": 2,
-                                           "message_id": uuid.uuid4().hex[:12]}, "payload": payload})
+                events.append(self._stream_event(rng, ts, "live-stream"))
         redelivered = [events[i] for i in rng.choice(len(events), max(1, len(events) // 50))] if events else []
         return events + redelivered
+
+    def live_events(self, n: int, rng: np.random.Generator | None = None) -> list[dict[str, Any]]:
+        """Events happening right now, for the continuous producer behind the app's live view."""
+        rng = rng or np.random.default_rng()
+        now = datetime.now(timezone.utc)
+        return [self._stream_event(rng, now - timedelta(milliseconds=int(rng.integers(0, 2500))), "pos-gateway-live")
+                for _ in range(n)]
 
     # ------------------------------------------------------------------ budgets & AP
     def budget_files(self) -> list[tuple[str, pd.DataFrame]]:

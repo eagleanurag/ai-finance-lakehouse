@@ -31,6 +31,7 @@ from src.pipelines import ingest, snapshot, transform
 from src.pipelines.sync import sync_all_warehouses
 from src.sources.kafka_client import EventBroker
 from src.ui import data
+from src.pipelines.live_stream import LiveStream
 from src.ui import theme as T
 
 T.register_template()
@@ -79,6 +80,22 @@ def load_meta(name: str) -> dict | None:
 
 
 ensure_warehouse()
+
+
+@st.cache_resource(show_spinner=False)
+def live_stream() -> LiveStream | None:
+    """One always-on producer/consumer per app process, shared by every viewer."""
+    return LiveStream().start() if settings.LIVE_STREAM_ENABLED else None
+
+
+LIVE = live_stream()
+
+
+def _live_label() -> str:
+    if LIVE is None:
+        return "stream off"
+    _, s = LIVE.snapshot()
+    return f"live · {s['transport'].lower()}"
 VERSION = data.pin_version()
 
 
@@ -132,7 +149,7 @@ def pad_x(fig: go.Figure, values) -> None:
     """Leave room for outside value labels on horizontal bars."""
     lo, hi = min(0.0, float(min(values))), max(0.0, float(max(values)))
     span = (hi - lo) or 1.0
-    fig.update_xaxes(range=[lo - (0.28 * span if lo < 0 else 0), hi + 0.22 * span])
+    fig.update_xaxes(range=[lo - (0.3 * span if lo < 0 else 0), hi + 0.3 * span])
 
 
 def _money_treemap(fig: go.Figure) -> None:
@@ -165,7 +182,8 @@ with st.sidebar:
     st.write("")
     page = st.radio(
         "Navigate",
-        ["🏠 Overview", "📈 Dashboard", "🤖 AI Analyst", "🧪 Data Quality", "🔍 Data Explorer", "🔄 Pipeline Ops"],
+        ["🏠 Overview", "📈 Dashboard", "⚡ Live Stream", "🤖 AI Analyst", "🧪 Data Quality", "🔍 Data Explorer",
+         "🔄 Pipeline Ops"],
         index=1,
         label_visibility="collapsed",
     )
@@ -182,7 +200,7 @@ with st.sidebar:
     st.markdown(
         f'<div style="margin-top:6px">'
         f'<span class="chip"><span class="dot"></span>{T.count(facts)} fact rows</span>'
-        f'<span class="chip">⚡ {EventBroker().mode.replace("_", " ")}</span>'
+        f'<span class="chip"><span class="dot live"></span>{_live_label()}</span>'
         f'<span class="chip">🤖 {len(providers)} LLM provider{"s" if len(providers) != 1 else ""}</span>'
         + (f'<span class="chip">🕒 {ts} UTC</span>' if ts else "") + "</div>",
         unsafe_allow_html=True,
@@ -193,6 +211,105 @@ with st.sidebar:
 
 
 # --------------------------------------------------------------------------- overview
+# --------------------------------------------------------------------------- live stream
+def render_live() -> None:
+    hero("Real-time speed layer", 'Live <span class="grad">transaction stream</span>',
+         "POS and ERP events are produced every few seconds, consumed back from the broker and landed in bronze "
+         "(the next notebook run promotes them to gold). This view refreshes itself every 3 seconds.")
+    if LIVE is None:
+        st.info("Live streaming is disabled (LIVE_STREAM_ENABLED=false).")
+        return
+    _, stats = LIVE.snapshot()
+    if stats["transport"] != "Aiven Kafka":
+        st.markdown(
+            f'<div class="callout">📡 <b>Streaming through the embedded broker.</b> Aiven Kafka: '
+            f'<code>{stats["kafka_status"]}</code>. Power the service on in the Aiven console and add '
+            '<code>KAFKA_BOOTSTRAP</code>, <code>KAFKA_CA_PEM</code>, <code>KAFKA_ACCESS_CERT</code> and '
+            '<code>KAFKA_ACCESS_KEY</code> to the app secrets — the stream switches over automatically within '
+            'five minutes.</div>', unsafe_allow_html=True)
+        st.write("")
+    _live_panel()
+
+
+@st.fragment(run_every=3)
+def _live_panel() -> None:
+    from datetime import datetime, timedelta, timezone
+
+    rows, stats = LIVE.snapshot()
+    if not rows:
+        st.info("Waiting for the first events from the broker…")
+        return
+    df = pd.DataFrame(rows)
+    df["received_at"] = pd.to_datetime(df["received_at"], utc=True)
+    df["amount"] = df["amount"].astype(float)
+    now = datetime.now(timezone.utc)
+    last_min = df[df["received_at"] >= now - timedelta(seconds=60)]
+    rev = df.loc[df["txn_type"] == "revenue", "amount"].sum()
+    cost = df.loc[df["txn_type"] != "revenue", "amount"].sum()
+    age = (now - stats["last_event_at"]).total_seconds() if stats["last_event_at"] else None
+
+    k = st.columns(3)
+    k[0].metric("Broker", stats["transport"], border=True)
+    k[1].metric("Events streamed", T.count(stats["consumed"]), border=True)
+    k[2].metric("Events / minute", len(last_min), border=True)
+    k = st.columns(3)
+    k[0].metric("Streamed revenue", T.money(rev), border=True)
+    k[1].metric("Streamed costs", T.money(cost), border=True)
+    k[2].metric("Last event", f"{age:.0f}s ago" if age is not None else "—", border=True)
+
+    window = df[df["received_at"] >= now - timedelta(minutes=5)].copy()
+    window["bucket"] = window["received_at"].dt.floor("10s")
+    window["flow"] = window["txn_type"].map({"revenue": "Revenue"}).fillna("Costs")
+    left, right = st.columns([3, 2])
+    with left, st.container(key="live_card_rate"):
+        rate = window.groupby(["bucket", "flow"], as_index=False).size()
+        fig = px.bar(rate, x="bucket", y="size", color="flow", color_discrete_map={"Revenue": T.BLUE, "Costs": T.ORANGE},
+                     title="Events per 10 seconds (last 5 minutes)")
+        fig.update_traces(hovertemplate="%{x|%H:%M:%S}<br>%{fullData.name}: %{y} events<extra></extra>")
+        fig.update_layout(barmode="stack", xaxis_title=None, yaxis_title=None, height=320, legend_title_text="")
+        st.plotly_chart(fig, width="stretch", config=PLOT_CONFIG, key="live_rate")
+    with right, st.container(key="live_card_dept"):
+        names = data.q("SELECT dept_code, department_name FROM gold.dim_department")
+        recent = df[df["received_at"] >= now - timedelta(minutes=15)].merge(names, on="dept_code", how="left")
+        top = (recent.groupby("department_name", as_index=False)["amount"].sum()
+               .nlargest(8, "amount").sort_values("amount"))
+        fig = go.Figure(go.Bar(x=top["amount"], y=top["department_name"], orientation="h", marker_color=T.VIOLET,
+                               text=top["amount"].map(T.money), textposition="outside", textfont=dict(color=T.INK_2),
+                               cliponaxis=False, hovertemplate="%{y}<br>%{x:$,.0f}<extra></extra>"))
+        fig.update_layout(title="Top departments by streamed amount (15 min)", height=320, yaxis_title=None,
+                          xaxis=dict(tickprefix="$", exponentformat="B"))
+        if len(top):
+            pad_x(fig, top["amount"])
+        st.plotly_chart(fig, width="stretch", config=PLOT_CONFIG, key="live_dept")
+
+    with st.container(key="live_card_cum"):
+        cum = df.sort_values("received_at").assign(
+            Revenue=lambda d: d["amount"].where(d["txn_type"] == "revenue", 0).cumsum(),
+            Costs=lambda d: d["amount"].where(d["txn_type"] != "revenue", 0).cumsum())
+        fig = go.Figure([
+            go.Scatter(x=cum["received_at"], y=cum["Revenue"], name="Revenue", line=dict(color=T.BLUE),
+                       hovertemplate="%{x|%H:%M:%S}<br>Revenue %{y:$,.0f}<extra></extra>"),
+            go.Scatter(x=cum["received_at"], y=cum["Costs"], name="Costs", line=dict(color=T.ORANGE),
+                       hovertemplate="%{x|%H:%M:%S}<br>Costs %{y:$,.0f}<extra></extra>"),
+        ])
+        fig.update_layout(title="Cumulative streamed revenue vs costs since the stream started", height=280,
+                          yaxis=dict(tickprefix="$", exponentformat="B"), legend_title_text="")
+        st.plotly_chart(fig, width="stretch", config=PLOT_CONFIG, key="live_cum")
+
+    st.markdown("**Latest events**")
+    latest = df.sort_values("received_at", ascending=False).head(15)
+    latest = latest.assign(time=latest["received_at"].dt.strftime("%H:%M:%S"),
+                           party=latest["vendor_name"].fillna(latest["customer_id"]))
+    st.dataframe(latest[["time", "transaction_id", "txn_type", "dept_code", "account_code", "party", "amount",
+                         "currency", "latency_ms"]],
+                 hide_index=True, width="stretch", height=420,
+                 column_config={"amount": st.column_config.NumberColumn("Amount", format="dollar"),
+                                "party": "Vendor / customer", "latency_ms": st.column_config.NumberColumn("Latency ms")})
+    st.caption(f"Produced {stats['produced']:,} · consumed {stats['consumed']:,} · landed in bronze "
+               f"{stats['landed']:,} · errors {stats['errors']} · stream up since "
+               f"{stats['started_at']:%H:%M:%S} UTC")
+
+
 def render_overview() -> None:
     hero("Enterprise data platform", 'Streaming lakehouse + <span class="grad">GenAI financial analyst</span>',
          "Eight raw sources with deliberately messy data land in bronze, two notebooks clean and model them into a "
@@ -1075,6 +1192,7 @@ def render_pipeline_ops() -> None:
 PAGES = {
     "🏠 Overview": render_overview,
     "📈 Dashboard": render_dashboard,
+    "⚡ Live Stream": render_live,
     "🤖 AI Analyst": render_chat,
     "🧪 Data Quality": render_data_quality,
     "🔍 Data Explorer": render_explorer,

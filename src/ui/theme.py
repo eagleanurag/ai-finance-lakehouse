@@ -126,6 +126,13 @@ div[data-testid="stExpander"] details {{ border-radius: 12px; border-color: #232
 .hero p {{ color: {INK_2}; max-width: 860px; margin: 0; }}
 .chip {{ display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: .74rem;
     border: 1px solid #2a3245; color: {INK_2}; background: rgba(255,255,255,.03); margin: 0 6px 6px 0; }}
+[data-testid="stToolbarActions"], [data-testid="stAppDeployButton"], [data-testid="stMainMenu"],
+#MainMenu, [data-testid="stDecoration"] {{ display: none !important; visibility: hidden; }}
+[class*="st-key-live_card_"] {{ background: linear-gradient(170deg, #151b2a 0%, {SURFACE} 100%); border: 1px solid #232a3b;
+    border-radius: 16px; padding: 10px 14px 6px; }}
+.chip .dot.live {{ animation: pulse 1.6s infinite; }}
+@keyframes pulse {{ 0% {{ box-shadow: 0 0 0 0 rgba(12,163,12,.7); }} 70% {{ box-shadow: 0 0 0 7px rgba(12,163,12,0); }}
+    100% {{ box-shadow: 0 0 0 0 rgba(12,163,12,0); }} }}
 .chip .dot {{ width: 7px; height: 7px; border-radius: 50%; background: {STATUS['good']}; box-shadow: 0 0 8px {STATUS['good']}; }}
 .flow {{ display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; margin: 6px 0 4px; }}
 .flow .step {{ flex: 1 1 150px; background: {SURFACE}; border: 1px solid #232a3b; border-radius: 14px; padding: 12px 14px; position: relative; }}

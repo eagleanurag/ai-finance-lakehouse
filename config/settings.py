@@ -66,6 +66,12 @@ KAFKA_SECURITY_PROTOCOL = _secret("KAFKA_SECURITY_PROTOCOL", "SASL_SSL")
 KAFKA_SASL_MECHANISM = _secret("KAFKA_SASL_MECHANISM", "PLAIN")
 KAFKA_USERNAME = _secret("KAFKA_USERNAME")
 KAFKA_PASSWORD = _secret("KAFKA_PASSWORD")
+# Aiven client-certificate auth: PEM text (for Streamlit/CI secrets) instead of files in data/secrets/
+KAFKA_CA_PEM = _secret("KAFKA_CA_PEM")
+KAFKA_ACCESS_CERT = _secret("KAFKA_ACCESS_CERT")
+KAFKA_ACCESS_KEY = _secret("KAFKA_ACCESS_KEY")
+LIVE_STREAM_ENABLED = _secret("LIVE_STREAM_ENABLED", "true").lower() == "true"
+LIVE_STREAM_INTERVAL = float(_secret("LIVE_STREAM_INTERVAL", "3"))
 
 if KAFKA_BOOTSTRAP:
     KAFKA_MODE = "aiven_ssl"

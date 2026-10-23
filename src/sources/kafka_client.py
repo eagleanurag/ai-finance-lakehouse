@@ -43,45 +43,49 @@ class EventBroker:
         return self._consume_file(max_messages)
 
     def _kafka_security_config(self) -> dict[str, str]:
+        """Client-certificate SSL when the Aiven access cert/key exist (files or secrets), else SASL_SSL."""
         import logging
 
         log = logging.getLogger(__name__)
-        conf = {
-            "bootstrap.servers": settings.KAFKA_BOOTSTRAP,
-            "security.protocol": settings.KAFKA_SECURITY_PROTOCOL,
-            "sasl.mechanisms": settings.KAFKA_SASL_MECHANISM,
-            "sasl.username": settings.KAFKA_USERNAME,
-            "sasl.password": settings.KAFKA_PASSWORD,
-        }
-        ca_path = self._ensure_ca()
-        if ca_path:
-            conf["ssl.ca.location"] = ca_path
+        ca = _secret_file("aiven-ca.pem", settings.KAFKA_CA_PEM)
+        cert = _secret_file("service.cert", settings.KAFKA_ACCESS_CERT)
+        key = _secret_file("service.key", settings.KAFKA_ACCESS_KEY)
+        conf = {"bootstrap.servers": settings.KAFKA_BOOTSTRAP}
+        if cert and key:
+            conf.update({"security.protocol": "SSL", "ssl.certificate.location": cert, "ssl.key.location": key})
         else:
-            log.warning(
-                "Aiven CA pem not found at %s - SSL verification will fail until it is placed there",
-                self._ca_path(),
-            )
-        cert = settings.PROJECT_ROOT / "data" / "secrets" / "service.cert"
-        key = settings.PROJECT_ROOT / "data" / "secrets" / "service.key"
-        if cert.exists() and key.exists():
-            conf["security.protocol"] = "SSL"
-            conf["ssl.certificate.location"] = str(cert)
-            conf["ssl.key.location"] = str(key)
+            conf.update({
+                "security.protocol": settings.KAFKA_SECURITY_PROTOCOL,
+                "sasl.mechanisms": settings.KAFKA_SASL_MECHANISM,
+                "sasl.username": settings.KAFKA_USERNAME,
+                "sasl.password": settings.KAFKA_PASSWORD,
+            })
+        if ca:
+            conf["ssl.ca.location"] = ca
+        else:
+            log.warning("Aiven CA pem not found (data/secrets/aiven-ca.pem or KAFKA_CA_PEM) - SSL verification will fail")
         return conf
 
-    @staticmethod
-    def _ca_path() -> str:
-        return str(settings.PROJECT_ROOT / "data" / "secrets" / "aiven-ca.pem")
+    def reachable(self, timeout: float = 8.0) -> tuple[bool, str]:
+        """Fast health check: DNS first (a powered-off Aiven service has no DNS record), then cluster metadata."""
+        if self.mode != "aiven_ssl":
+            return False, "no Kafka cluster configured"
+        import socket
 
-    def _ensure_ca(self) -> str | None:
-        """Aiven brokers use Aiven's own CA; librdkafka needs an explicit PEM."""
-        ca_path = Path(self._ca_path())
+        host, _, port = settings.KAFKA_BOOTSTRAP.rpartition(":")
         try:
-            if ca_path.exists() and ca_path.stat().st_size > 500:
-                return str(ca_path)
-        except Exception:
-            pass
-        return None
+            socket.getaddrinfo(host, int(port or 9092))
+        except (socket.gaierror, ValueError) as exc:
+            return False, f"broker host does not resolve ({exc}) - is the Aiven service powered on?"
+        try:
+            from confluent_kafka.admin import AdminClient
+
+            md = AdminClient({**self._kafka_security_config(), "log_level": 0}).list_topics(timeout=timeout)
+        except Exception as exc:
+            return False, f"cluster unreachable: {exc}"
+        if self.topic not in md.topics:
+            return False, f"topic {self.topic} not found"
+        return True, f"{len(md.brokers)} broker(s), topic {self.topic} ok"
 
     def _produce_native(self, events: list[dict[str, Any]]) -> int:
         from confluent_kafka import Producer
@@ -190,6 +194,17 @@ class EventBroker:
             fh.write("\n".join(remaining) + ("\n" if remaining else ""))
         os.replace(tmp, self._outbox)
         return [json.loads(line) for line in taken]
+
+
+def _secret_file(name: str, content: str) -> str | None:
+    """librdkafka needs PEM files; on Streamlit Cloud they arrive as secret strings, so write them out once."""
+    path = settings.DATA_DIR / "secrets" / name
+    if content and content.strip().startswith("-----BEGIN"):
+        pem = content.strip() + "\n"
+        if not path.exists() or path.read_text(encoding="utf-8") != pem:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(pem, encoding="utf-8")
+    return str(path) if path.exists() and path.stat().st_size > 100 else None
 
 
 def partition_path(base: Path, event_date: str) -> Path:

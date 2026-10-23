@@ -103,7 +103,7 @@ Copy `.env.example` to `.env` and fill in only what you use. **Every key is opti
 
 | Layer | Service (free tier) | Env keys |
 |---|---|---|
-| Streaming | [Aiven Apache Kafka](https://aiven.io/free-kafka) — forever-free plan, real Kafka protocol over SSL, no card | `KAFKA_BOOTSTRAP` `KAFKA_USERNAME` `KAFKA_PASSWORD` |
+| Streaming | [Aiven Apache Kafka](https://aiven.io/free-kafka) — forever-free plan, real Kafka protocol over SSL, no card | `KAFKA_BOOTSTRAP` + client cert as files in `data/secrets/` or as secret text `KAFKA_CA_PEM` `KAFKA_ACCESS_CERT` `KAFKA_ACCESS_KEY` (or SASL `KAFKA_USERNAME` `KAFKA_PASSWORD`) |
 | Bronze lake | Azure Blob / ADLS Gen2 — 5 GB always free | `AZURE_STORAGE_CONNECTION_STRING`, `AZURE_CONTAINER` |
 | OLAP warehouse | [BigQuery Sandbox](https://cloud.google.com/bigquery/docs/sandbox) — no card, 1 TB query/mo | `BIGQUERY_PROJECT`, `GOOGLE_APPLICATION_CREDENTIALS` |
 | OLTP serving | [Neon](https://neon.tech) / Supabase Postgres — free serverless | `POSTGRES_DSN` |
@@ -115,6 +115,15 @@ Copy `.env.example` to `.env` and fill in only what you use. **Every key is opti
 | LLM #3 | [Mistral La Plateforme](https://console.mistral.ai) — free experiment tier | `MISTRAL_API_KEY` |
 | LLM #4 | [OpenRouter](https://openrouter.ai/keys) — free model tier (`:free` models), no card | `OPENROUTER_API_KEY` |
 | BI | Power BI Desktop (free) → publish-to-web URL | `POWERBI_EMBED_URL` |
+
+### Live streaming
+
+The app runs one always-on producer/consumer per process (`src/pipelines/live_stream.py`): every few seconds it
+produces POS/ERP events, consumes them back from the broker, lands them in bronze (`source=kafka_live`, picked up by
+the next notebook run) and feeds the **⚡ Live Stream** page, which refreshes itself every 3 seconds. It uses Aiven
+Kafka when the cluster is reachable and otherwise an embedded broker, re-checking Kafka every five minutes — note
+that Aiven powers off idle free services, which removes their DNS name until you power them on again.
+Tune with `LIVE_STREAM_INTERVAL` (seconds, default 3) or turn it off with `LIVE_STREAM_ENABLED=false`.
 
 ### How the AI failover works
 
