@@ -57,16 +57,16 @@ def build() -> bool:
             for schema in ("silver", "gold"):
                 tables = sorted({r["table"] for r in dictionary[schema]})
                 for t in tables:
-                    n = con.execute(f'SELECT COUNT(*) FROM {schema}."{t}"').fetchone()[0]
+                    n = con.execute(f'SELECT COUNT(*) FROM {schema}."{t}"').fetchall()[0][0]
                     status["gold_tables"][f"{schema}.{t}"] = n
 
             try:
                 status["fact_rows"] = con.execute(
                     "SELECT COUNT(*) FROM gold.fact_transactions"
-                ).fetchone()[0]
+                ).fetchall()[0][0]
                 status["months_covered"] = con.execute(
                     "SELECT COUNT(DISTINCT date_trunc('month', event_ts)) FROM gold.fact_transactions"
-                ).fetchone()[0]
+                ).fetchall()[0][0]
                 status["channels"] = [
                     r[0]
                     for r in con.execute(
@@ -87,7 +87,7 @@ def build() -> bool:
                            count(*) FILTER (WHERE layer = 'gold' AND severity = 'error' AND failed_rows > 0)
                     FROM audit.dq_results WHERE run_id = (SELECT max(run_id) FROM audit.dq_results)
                     """
-                ).fetchone()
+                ).fetchall()[0]
                 status["data_quality"] = {
                     "rows_landed": landed, "rows_quarantined": quarantined, "rows_repaired_or_flagged": repaired,
                     "gold_tests": tests, "gold_tests_failed": failed,

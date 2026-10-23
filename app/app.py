@@ -48,8 +48,8 @@ def _warehouse_ready() -> bool:
         con = duckdb.connect(str(settings.DUCKDB_PATH), read_only=True)
         try:
             ok = con.execute("SELECT count(*) FROM duckdb_tables() WHERE schema_name = 'gold' "
-                             "AND table_name IN ('fact_transactions', 'fact_ap_invoices')").fetchone()[0] == 2
-            return ok and con.execute("SELECT count(*) FROM gold.fact_transactions").fetchone()[0] > 0
+                             "AND table_name IN ('fact_transactions', 'fact_ap_invoices')").fetchall()[0][0] == 2
+            return ok and con.execute("SELECT count(*) FROM gold.fact_transactions").fetchall()[0][0] > 0
         finally:
             con.close()
     except duckdb.Error:

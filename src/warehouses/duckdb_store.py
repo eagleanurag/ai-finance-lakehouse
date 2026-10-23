@@ -37,7 +37,7 @@ def sync_motherduck() -> dict[str, Any]:
             results: dict[str, Any] = {}
             for table in tables:
                 md.execute(f"CREATE OR REPLACE TABLE {table} AS SELECT * FROM local_wh.gold.{table}")
-                results[table] = md.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
+                results[table] = md.execute(f"SELECT count(*) FROM {table}").fetchall()[0][0]
             return {"status": "ok", "tables": results}
         finally:
             md.close()

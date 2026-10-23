@@ -36,7 +36,7 @@ def pack(out_dir: Path | None = None) -> Path:
 def fact_rows(path: Path) -> int:
     con = duckdb.connect(str(path), read_only=True)
     try:
-        return con.execute("SELECT count(*) FROM gold.fact_transactions").fetchone()[0]
+        return con.execute("SELECT count(*) FROM gold.fact_transactions").fetchall()[0][0]
     finally:
         con.close()
 
