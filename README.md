@@ -16,17 +16,18 @@ Streaming + batch ingestion → medallion lakehouse (Bronze/Silver/Gold) → sta
 └──────────┬─────────────────────────┬───────────────────────┬────────────┘
            ▼                         ▼                       ▼
 ┌───────────────────────────── BRONZE LAKE ───────────────────────────────┐
-│      Raw JSONL partitions → local lake dir / Azure Blob (ADLS Gen2)     │
+│  Raw parquet / CSV / JSONL partitions → local lake / Azure Blob (ADLS)  │
+│  ERP · POS · Kafka · budgets · AP sub-ledger · FX · masters  (~2.4M rows)│
 └──────────────────────────────────┬──────────────────────────────────────┘
                                    ▼
-┌──────────────────── SILVER (DuckDB SQL transforms) ─────────────────────┐
-│          typed · deduplicated · standardized entity tables              │
+┌──────────── SILVER · notebooks/01_bronze_to_silver.ipynb ───────────────┐
+│  CDC · dedupe · FX · SCD2 masters · quarantine · audit.dq_results       │
 └──────────────────────────────────┬──────────────────────────────────────┘
                                    ▼
-┌────────────────────── GOLD STAR SCHEMA + KPIs ──────────────────────────┐
-│  dim_date · dim_department · dim_gl_account · dim_vendor                │
-│  fact_transactions · fact_budget                                        │
-│  kpi_monthly_actual_vs_budget · monthly_financials                      │
+┌───────── GOLD STAR SCHEMA · notebooks/02_silver_to_gold.ipynb ──────────┐
+│  dim_date · dim_department(+history) · dim_gl_account · dim_vendor      │
+│  dim_customer · fact_transactions (2M) · fact_budget · fact_ap_invoices │
+│  KPI tables · 39 production tests gate the publish                      │
 └──────────┬───────────────────────────────┬──────────────────────────────┘
            ▼                               ▼
 ┌────────── BI SERVING ──────────┐  ┌───────── AI ANALYST ────────────────┐
@@ -39,7 +40,9 @@ Streaming + batch ingestion → medallion lakehouse (Bronze/Silver/Gold) → sta
 ## Highlights
 
 - **4 source connector types** — Kafka streaming events (Aiven, SASL_SSL), CSV/Excel file drops, SharePoint/MS Graph sync, and image→text OCR invoice extraction (RapidOCR/Tesseract)
-- **Medallion architecture** — immutable bronze partitions, deduplicated typed silver, gold star schema built from versioned SQL models executed by a DuckDB runner
+- **2M-row production-scale data with real defects** — 8 synthetic sources (ERP, POS, Kafka, budgets, AP sub-ledger, FX, SharePoint, CRM) with ~20 deliberately injected data-engineering problems
+- **Medallion architecture in notebooks** — `01_bronze_to_silver.ipynb` cleans, conforms and quarantines; `02_silver_to_gold.ipynb` builds the star schema and runs 39 production tests that gate publishing
+- **Blue/green warehouse builds** — notebooks write to a staging database that replaces the live one only when every gold test passes
 - **Multi-warehouse sync** — one command pushes gold tables to Neon Postgres, BigQuery Sandbox, MotherDuck, and Azure SQL (each auto-skips when unconfigured)
 - **LLM gateway with automatic failover** — Text-to-SQL answers survive rate limits by shifting Groq → Gemini → Mistral → OpenRouter; manual model selection included
 - **Guarded Text-to-SQL** — schema-aware prompting, SELECT-only sanitizer, self-repair retry loop, enforced LIMITs
@@ -50,11 +53,42 @@ Streaming + batch ingestion → medallion lakehouse (Bronze/Silver/Gold) → sta
 
 ```bash
 pip install -r requirements.txt
-python run_pipeline.py full          # simulate sources -> Kafka -> bronze -> silver/gold
-streamlit run app/app.py             # open http://localhost:8501
+python run_pipeline.py full --no-sync    # generate 2M rows -> bronze -> notebooks -> gold (~3 min)
+streamlit run app/app.py                 # open http://localhost:8501
 ```
 
-The pipeline prints per-step summaries; the app boots against `data/warehouse.duckdb`. If the warehouse is missing, the app rebuilds it automatically on first load.
+Useful flags: `--rows 200000` for a quick build, `--reset` to wipe bronze first, `--save-outputs` to write
+results back into the notebooks. The notebooks also run interactively in Jupyter/VS Code from `notebooks/`.
+
+## Data: sources, scale and edge cases
+
+| Source | Bronze format | Rows (default) | Defects injected on purpose |
+|---|---|---|---|
+| ERP ledger backfill | Parquet, monthly | ~1.9M | CDC updates & deletes, redelivered duplicates, schema drift (new columns), NaN / zero / ×1000 amounts, null ids, future-dated events, late arrivals |
+| Kafka stream + replay | JSONL envelopes | ~40k | malformed lines, schema v1 `amt` vs v2 `amount`, epoch-millis and `+05:30` timestamps |
+| Legacy POS | CSV per month | ~80k | renamed columns, `MM/DD/YYYY`, `"$1,234.50"` / `N/A` amounts, lower-case currency, voided receipts |
+| Manual adjustments | CSV | 1.5k | rows uploaded twice |
+| Budgets | CSV, 2 layouts | ~55k | `2025-01` / `Jan-2025` / broken periods, formatted amounts, resubmitted files, negative and blank lines, unknown departments |
+| AP sub-ledger | Parquet | ~190k | status changes as CDC, duplicate billing, due date before invoice date, missing vendor, overpayments, credit notes |
+| FX rates | Parquet | ~5k | weekend/holiday gaps, null and zero rates, two overlapping providers |
+| Masters (SharePoint, CRM) | Parquet + CSV snapshots | 41 depts · 60 GL · 5.1k vendors · 51k customers | SCD2 changes, near-duplicate vendors and customers, code / country / category spellings, test accounts |
+
+Across all channels, codes arrive as `ENG-NA`, `eng-na`, `" ENG-NA "`, `ENG_NA` or `ENGNA`, amounts come in 7
+currencies with mixed casing, and 10% of transaction types are misspelled. Scale is set by `SIM_TARGET_FACT_ROWS`
+(default 2,000,000) and `SIM_HISTORY_MONTHS` (24).
+
+### Silver: `notebooks/01_bronze_to_silver.ipynb`
+Lands every channel into one shape, parses all formats, applies CDC (latest `event_version` wins, deletes remove the
+row), removes redelivered duplicates, converts to USD with gap-filled ECB rates, resolves vendors and customers
+through alias maps, builds SCD2 departments and customers, and quarantines hard failures (unparseable values,
+future dates, invalid currency, missing FX, statistical outliers, duplicate invoices, …) into `audit.quarantine`.
+Soft issues are kept and flagged so no money is lost. Every rule writes a row to `audit.dq_results`.
+
+### Gold: `notebooks/02_silver_to_gold.ipynb`
+Star schema with conformed dimensions (`-1` unknown / `-2` not-applicable members, inferred members for unregistered
+vendors), `fact_transactions` (~2M), `fact_budget` (all plan versions, latest flagged), `fact_ap_invoices` with aging,
+and KPI tables (month-to-date budgets prorated). 39 tests check keys, foreign keys, reconciliation to silver to the
+cent and freshness; any `error` stops the publish.
 
 Optional extras:
 
@@ -110,11 +144,17 @@ GEMINI_API_KEY = "..."
 POWERBI_EMBED_URL = "https://app.powerbi.com/view?r=..."
 ```
 
-First visitor triggers the bootstrap (~15 s): data simulates relative to *today*, builds bronze→gold, then serves. Subsequent loads are instant.
+On a cold start the app downloads the warehouse snapshot that the nightly workflow publishes as a GitHub Release
+asset (`warehouse.duckdb.gz`, ~110 MB, a few seconds). If no snapshot is published yet it builds the warehouse
+itself, which takes several minutes on Streamlit's shared CPU. Override the source with `WAREHOUSE_SNAPSHOT_URL`.
 
 ## Nightly orchestration (GitHub Actions)
 
-`.github/workflows/pipeline.yml` runs daily at 02:00 UTC: ingest new simulated days → transform → sync configured warehouses (so a published Power BI report refreshes from Neon/BigQuery). Add repo secrets matching the table above; set variable `ENABLE_WAREHOUSE_SYNC=true` once warehouses are configured.
+`.github/workflows/pipeline.yml` runs daily at 02:00 UTC: generate sources → run both notebooks → sync configured
+warehouses → publish the warehouse snapshot to the `warehouse-latest` release. The website workflow then redeploys
+with fresh numbers. Add repo secrets matching the table above; set variable `ENABLE_WAREHOUSE_SYNC=true` once
+warehouses are configured. Free-tier OLTP targets (Neon, Azure SQL) only receive gold tables up to
+`SYNC_MAX_ROWS` (250k) so the 2M-row fact stays within their storage limits; MotherDuck and BigQuery get everything.
 
 ## Power BI publish-to-web
 
@@ -129,23 +169,25 @@ Requires a work/school email; a free [Microsoft 365 Developer Program](https://d
 
 ```
 ai-finance-lakehouse/
-├── app/app.py                     # Streamlit showcase (dashboard, chat, explorer, ops)
+├── app/app.py                     # Streamlit showcase (dashboard, chat, data quality, explorer, ops)
 ├── run_pipeline.py                # CLI: ingest | transform | sync | full
 ├── config/settings.py             # env/secrets loader, paths, provider order
-├── src/sources/                   # simulator, Kafka client (REST+file broker),
+├── notebooks/                     # 01_bronze_to_silver, 02_silver_to_gold (the transformation pipeline)
+├── src/sources/                   # 2M-row data generator, Kafka client (REST+file broker),
 │                                  # file ingest, SharePoint/Graph, OCR, invoice renderer
 ├── src/pipelines/                 # bronze landing (+Azure mirror), ingest orchestrator,
-│                                  # DuckDB transform runner, warehouse sync
+│                                  # notebook runner (staging + publish), snapshot, warehouse sync
 ├── src/warehouses/                # MotherDuck, Neon Postgres, BigQuery, MSSQL adapters
 ├── src/ai/                        # LLM fallback router, Text-to-SQL guard, forecaster, agent
-├── transform/sql/*.sql            # ordered silver/gold SQL models (11 models)
 ├── data/                          # auto-generated lake, warehouse, sample invoices
-└── .github/workflows/pipeline.yml # nightly ETL cron
+└── .github/workflows/             # nightly build + snapshot release, GitHub Pages site
 ```
 
 ## Resume bullets this project demonstrates
 
 - Designed a hybrid batch/streaming lakehouse (Kafka → Bronze/Silver/Gold) with idempotent, partitioned raw storage and dimensional star-schema modeling
+- Processed 2M+ transactions from 8 heterogeneous sources, handling CDC, late-arriving and duplicate events, schema drift, SCD2 master data and multi-currency conversion, with quarantine and auditable data-quality metrics
+- Gated warehouse publishing on 39 automated data tests (key integrity, referential integrity, reconciliation to the cent) using blue/green staging builds
 - Built vendor-agnostic LLM gateway with rate-limit-aware multi-provider failover and read-only guarded Text-to-SQL generation with self-correction loops
 - Integrated statistical forecasting (Prophet/Holt-Winters) into an agentic analytics workflow with executive-grade narrative synthesis
 - Delivered $0 cloud cost via layered free tiers (Aiven, Azure, GCP BigQuery Sandbox, Neon, MotherDuck, Streamlit Cloud, GitHub Actions) with graceful degradation when unconfigured

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import re
 import shutil
+from datetime import date
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 
@@ -25,30 +26,32 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def ingest_incoming_files() -> list[dict[str, Any]]:
-    landed: list[dict[str, Any]] = []
-    for path in sorted(settings.FILES_DIR.glob("*")):
-        if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
-            continue
-        df = normalize_columns(read_tabular(path))
-        landed.append(
-            {
-                "source_file": path.name,
-                "dataset": _detect_dataset(path, df),
-                "rows": len(df),
-                "records": df.to_dict(orient="records"),
-            }
-        )
-    return landed
-
-
-def _detect_dataset(path: Path, df: pd.DataFrame) -> str:
+def classify_drop(path: Path) -> tuple[Path, str, str] | None:
+    """Route a dropped finance file to (bronze entity dir, partition dt, source tag) by its name."""
     name = path.stem.lower()
-    if "budget" in name or {"year_month", "dept_code", "account_code"} <= set(df.columns):
-        return "budgets"
-    if {"transaction_id", "event_date", "amount_usd"} <= set(df.columns):
-        return "transactions"
-    return name
+    today = date.today().isoformat()
+    if name.startswith("budget"):
+        return settings.BRONZE_BUDGET_DIR, today, "file_upload"
+    if name.startswith("pos_legacy"):
+        period = re.search(r"(\d{4})(\d{2})", name)
+        dt = f"{period.group(1)}-{period.group(2)}-01" if period else today
+        return settings.BRONZE_TXN_DIR, dt, "pos_legacy"
+    if name.startswith("manual_adjustments"):
+        return settings.BRONZE_TXN_DIR, today, "file_upload"
+    return None
+
+
+def incoming_files() -> list[Path]:
+    return [p for p in sorted(settings.FILES_DIR.glob("*")) if p.suffix.lower() in SUPPORTED_EXTENSIONS]
+
+
+def as_csv(path: Path) -> Path:
+    """Bronze stores spreadsheets as CSV so silver reads one text format; CSV drops pass through untouched."""
+    if path.suffix.lower() == ".csv":
+        return path
+    out = path.with_suffix(".csv")
+    read_tabular(path).to_csv(out, index=False)
+    return out
 
 
 def archive_processed(path: Path) -> Path:

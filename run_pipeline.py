@@ -15,39 +15,41 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)-7s %(na
 log = logging.getLogger("pipeline")
 
 
-def cmd_full(args: argparse.Namespace) -> None:
-    log.info("Step 1/4 - Ingesting sources (stream + files + masters%s)", " + OCR" if not args.no_ocr else "")
-    summary = ingest.run_full_ingest(
+def _ingest(args: argparse.Namespace) -> dict:
+    return ingest.run_full_ingest(
         stream_days=args.days,
         txns_per_day=settings.SIM_TXNS_PER_DAY,
-        budget_months=args.budget_months,
         include_ocr=not args.no_ocr,
+        target_rows=args.rows,
+        history_months=args.months,
+        reset=args.reset,
     )
+
+
+def cmd_full(args: argparse.Namespace) -> None:
+    log.info("Step 1/3 - Ingesting sources into bronze (%s rows over %s months%s)",
+             f"{args.rows or settings.SIM_TARGET_FACT_ROWS:,}", args.months or settings.SIM_HISTORY_MONTHS,
+             ", fresh lake" if args.reset else "")
+    summary = _ingest(args)
     log.info("Ingest summary: %s", json.dumps(summary, default=str))
 
-    log.info("Step 2/4 - Running medallion transforms (bronze -> silver -> gold)")
-    meta = transform.run_transforms()
+    log.info("Step 2/3 - Running notebooks (bronze -> silver -> gold) into staging, publishing on green tests")
+    meta = transform.run_transforms(save_outputs=args.save_outputs)
     log.info("Gold tables: %s", json.dumps(meta["gold_row_counts"]))
 
     if not args.no_sync:
-        log.info("Step 3/4 - Syncing to external warehouses (skips unconfigured targets)")
+        log.info("Step 3/3 - Syncing to external warehouses (skips unconfigured targets)")
         sync.sync_all_warehouses()
 
-    log.info("Step 4/4 - Done. Warehouse: %s", settings.DUCKDB_PATH)
+    log.info("Done. Warehouse: %s", settings.DUCKDB_PATH)
 
 
 def cmd_ingest(args: argparse.Namespace) -> None:
-    summary = ingest.run_full_ingest(
-        stream_days=args.days,
-        txns_per_day=settings.SIM_TXNS_PER_DAY,
-        budget_months=args.budget_months,
-        include_ocr=not args.no_ocr,
-    )
-    print(json.dumps(summary, indent=2, default=str))
+    print(json.dumps(_ingest(args), indent=2, default=str))
 
 
-def cmd_transform(_args: argparse.Namespace) -> None:
-    meta = transform.run_transforms()
+def cmd_transform(args: argparse.Namespace) -> None:
+    meta = transform.run_transforms(save_outputs=args.save_outputs)
     print(json.dumps(meta, indent=2, default=str))
 
 
@@ -60,20 +62,25 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="AI Finance Lakehouse pipeline runner")
     sub = parser.add_subparsers(dest="command")
 
-    p_full = sub.add_parser("full", help="ingest -> transform -> sync")
-    p_full.add_argument("--days", type=int, default=400)
-    p_full.add_argument("--budget-months", type=int, default=18)
-    p_full.add_argument("--no-ocr", action="store_true")
+    def ingest_args(p: argparse.ArgumentParser) -> None:
+        p.add_argument("--rows", type=int, default=None, help="target fact rows (default SIM_TARGET_FACT_ROWS=2M)")
+        p.add_argument("--months", type=int, default=None, help="months of history (default SIM_HISTORY_MONTHS=24)")
+        p.add_argument("--days", type=int, default=14, help="days of fresh events to publish to the Kafka topic")
+        p.add_argument("--no-ocr", action="store_true")
+        p.add_argument("--reset", action="store_true", help="wipe bronze + generated drops before ingesting")
+
+    p_full = sub.add_parser("full", help="ingest -> notebooks -> sync")
+    ingest_args(p_full)
     p_full.add_argument("--no-sync", action="store_true")
+    p_full.add_argument("--save-outputs", action="store_true", help="write cell outputs back into the notebooks")
     p_full.set_defaults(func=cmd_full)
 
-    p_ing = sub.add_parser("ingest", help="run ingestion only")
-    p_ing.add_argument("--days", type=int, default=30)
-    p_ing.add_argument("--budget-months", type=int, default=6)
-    p_ing.add_argument("--no-ocr", action="store_true")
+    p_ing = sub.add_parser("ingest", help="generate sources and land them in bronze")
+    ingest_args(p_ing)
     p_ing.set_defaults(func=cmd_ingest)
 
-    p_tr = sub.add_parser("transform", help="rebuild silver/gold from bronze")
+    p_tr = sub.add_parser("transform", help="run the silver/gold notebooks against bronze")
+    p_tr.add_argument("--save-outputs", action="store_true", help="write cell outputs back into the notebooks")
     p_tr.set_defaults(func=cmd_transform)
 
     p_sy = sub.add_parser("sync", help="push gold tables to configured warehouses")

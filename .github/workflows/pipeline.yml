@@ -5,18 +5,21 @@ on:
     - cron: "0 2 * * *"
   workflow_dispatch:
     inputs:
-      days:
-        description: "Days of transactions to simulate"
-        default: "7"
+      rows:
+        description: "Fact rows to generate"
+        default: "2000000"
 
 concurrency:
   group: lakehouse-pipeline
   cancel-in-progress: true
 
+permissions:
+  contents: write  # publish the warehouse snapshot release asset
+
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -30,16 +33,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run ingestion (stream + files + masters)
+      - name: Generate sources and land them in bronze
         env:
           UPSTASH_KAFKA_REST_URL: ${{ secrets.UPSTASH_KAFKA_REST_URL }}
           UPSTASH_KAFKA_REST_USERNAME: ${{ secrets.UPSTASH_KAFKA_REST_USERNAME }}
           UPSTASH_KAFKA_REST_PASSWORD: ${{ secrets.UPSTASH_KAFKA_REST_PASSWORD }}
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
           SIM_TXNS_PER_DAY: "25"
-        run: python run_pipeline.py ingest --days "${{ github.event.inputs.days || 7 }}"
+        run: python run_pipeline.py ingest --rows "${{ github.event.inputs.rows || 2000000 }}" --no-ocr
 
-      - name: Run transforms (bronze -> silver -> gold)
+      - name: Run notebooks (bronze -> silver -> gold, publish on green tests)
         run: python run_pipeline.py transform
 
       - name: Sync external warehouses
@@ -54,14 +57,12 @@ jobs:
           pip install 'psycopg[binary]' google-cloud-bigquery || true
           python run_pipeline.py sync
 
-      - name: Commit refreshed warehouse snapshot
+      - name: Publish warehouse snapshot for the app and website
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          git config user.name "lakehouse-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add data/transform_meta.json data/sync_meta.json data/lake 2>/dev/null || true
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore(data): nightly lakehouse refresh [skip ci]"
-            git push
-          fi
+          python -c "from src.pipelines import snapshot; snapshot.pack()"
+          gh release view warehouse-latest >/dev/null 2>&1 || gh release create warehouse-latest \
+            --title "Warehouse snapshot (nightly)" --prerelease \
+            --notes "Rebuilt every night by the pipeline. The Streamlit app downloads warehouse.duckdb.gz on a cold start."
+          gh release upload warehouse-latest data/warehouse.duckdb.gz data/transform_meta.json --clobber

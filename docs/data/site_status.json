@@ -1,24 +1,49 @@
 {
-  "generated_utc": "2026-08-21T23:08:20.867304+00:00",
+  "generated_utc": "2026-10-23T20:15:55.249029+00:00",
   "warehouse_ready": true,
-  "fact_rows": 10417,
-  "months_covered": 14,
+  "fact_rows": 1993263,
+  "months_covered": 25,
   "channels": [
+    "erp_backfill",
     "file_upload",
-    "kafka_stream"
+    "kafka_stream",
+    "pos_legacy"
   ],
   "gold_tables": {
-    "silver.silver_budgets": 468,
-    "silver.silver_invoices": 4,
-    "silver.silver_transactions": 10417,
-    "gold.dim_date": 400,
-    "gold.dim_department": 8,
-    "gold.dim_gl_account": 10,
-    "gold.dim_vendor": 17,
-    "gold.fact_budget": 468,
-    "gold.fact_transactions": 10417,
-    "gold.kpi_monthly_actual_vs_budget": 112,
-    "gold.monthly_financials": 14
+    "silver.ap_invoices": 148482,
+    "silver.customer_alias": 51000,
+    "silver.customers": 50020,
+    "silver.customers_scd2": 51390,
+    "silver.departments": 41,
+    "silver.departments_scd2": 89,
+    "silver.fx_rates_daily": 9114,
+    "silver.fx_rates_published": 3829,
+    "silver.gl_accounts": 60,
+    "silver.silver_budgets": 53686,
+    "silver.silver_invoices": 0,
+    "silver.silver_transactions": 1994931,
+    "silver.vendor_alias": 10100,
+    "silver.vendors": 5000,
+    "gold.dim_customer": 50022,
+    "gold.dim_date": 1096,
+    "gold.dim_department": 42,
+    "gold.dim_department_history": 89,
+    "gold.dim_gl_account": 61,
+    "gold.dim_vendor": 5407,
+    "gold.fact_ap_invoices": 148482,
+    "gold.fact_budget": 53686,
+    "gold.fact_transactions": 1993263,
+    "gold.kpi_ap_aging": 55,
+    "gold.kpi_monthly_actual_vs_budget": 1025,
+    "gold.kpi_revenue_by_segment": 420,
+    "gold.monthly_financials": 25
   },
-  "last_transform_utc": "2026-08-21T21:43:53.424423+00:00"
+  "last_transform_utc": "2026-10-23T20:13:56.156090+00:00",
+  "data_quality": {
+    "rows_landed": 2038025,
+    "rows_quarantined": 4174,
+    "rows_repaired_or_flagged": 249896,
+    "gold_tests": 39,
+    "gold_tests_failed": 0
+  }
 }

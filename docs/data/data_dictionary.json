@@ -1,6 +1,346 @@
 {
   "silver": [
     {
+      "table": "ap_invoices",
+      "column": "invoice_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "invoice_number",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "vendor_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "invoice_date",
+      "type": "DATE"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "due_date",
+      "type": "DATE"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "due_date_repaired",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "doc_type",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "status",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "currency",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "fx_rate",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "amount_usd",
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "paid_amount_usd",
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "paid_date",
+      "type": "DATE"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "is_overpaid",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "ingested_at",
+      "type": "TIMESTAMP WITH TIME ZONE"
+    },
+    {
+      "table": "ap_invoices",
+      "column": "source_file",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customer_alias",
+      "column": "alias",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customer_alias",
+      "column": "customer_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers",
+      "column": "customer_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers",
+      "column": "customer_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers",
+      "column": "email",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers",
+      "column": "segment",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers",
+      "column": "region",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers",
+      "column": "country",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers",
+      "column": "created_date",
+      "type": "DATE"
+    },
+    {
+      "table": "customers",
+      "column": "is_test",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "customers_scd2",
+      "column": "customer_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers_scd2",
+      "column": "customer_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers_scd2",
+      "column": "email",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers_scd2",
+      "column": "segment",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers_scd2",
+      "column": "region",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers_scd2",
+      "column": "country",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "customers_scd2",
+      "column": "created_date",
+      "type": "DATE"
+    },
+    {
+      "table": "customers_scd2",
+      "column": "is_test",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "customers_scd2",
+      "column": "valid_from",
+      "type": "DATE"
+    },
+    {
+      "table": "customers_scd2",
+      "column": "valid_to",
+      "type": "DATE"
+    },
+    {
+      "table": "customers_scd2",
+      "column": "is_current",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "departments",
+      "column": "dept_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "departments",
+      "column": "dept_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "departments",
+      "column": "business_function",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "departments",
+      "column": "region",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "departments",
+      "column": "cost_center",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "departments",
+      "column": "headcount",
+      "type": "INTEGER"
+    },
+    {
+      "table": "departments",
+      "column": "is_active",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "departments_scd2",
+      "column": "dept_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "departments_scd2",
+      "column": "dept_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "departments_scd2",
+      "column": "business_function",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "departments_scd2",
+      "column": "region",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "departments_scd2",
+      "column": "cost_center",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "departments_scd2",
+      "column": "headcount",
+      "type": "INTEGER"
+    },
+    {
+      "table": "departments_scd2",
+      "column": "is_active",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "departments_scd2",
+      "column": "valid_from",
+      "type": "DATE"
+    },
+    {
+      "table": "departments_scd2",
+      "column": "valid_to",
+      "type": "DATE"
+    },
+    {
+      "table": "departments_scd2",
+      "column": "is_current",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "fx_rates_daily",
+      "column": "currency",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fx_rates_daily",
+      "column": "rate_date",
+      "type": "DATE"
+    },
+    {
+      "table": "fx_rates_daily",
+      "column": "rate_to_usd",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "fx_rates_daily",
+      "column": "published_date",
+      "type": "DATE"
+    },
+    {
+      "table": "fx_rates_daily",
+      "column": "is_filled",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "fx_rates_published",
+      "column": "currency",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fx_rates_published",
+      "column": "rate_date",
+      "type": "DATE"
+    },
+    {
+      "table": "fx_rates_published",
+      "column": "rate_to_usd",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "fx_rates_published",
+      "column": "provider",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "gl_accounts",
+      "column": "account_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "gl_accounts",
+      "column": "account_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "gl_accounts",
+      "column": "category",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "gl_accounts",
+      "column": "parent_account_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "gl_accounts",
+      "column": "is_active",
+      "type": "BOOLEAN"
+    },
+    {
       "table": "silver_budgets",
       "column": "budget_id",
       "type": "VARCHAR"
@@ -27,13 +367,28 @@
     },
     {
       "table": "silver_budgets",
-      "column": "source_channel",
+      "column": "budget_version",
       "type": "VARCHAR"
     },
     {
       "table": "silver_budgets",
-      "column": "load_batch",
+      "column": "version_rank",
+      "type": "INTEGER"
+    },
+    {
+      "table": "silver_budgets",
+      "column": "submitted_at",
+      "type": "TIMESTAMP WITH TIME ZONE"
+    },
+    {
+      "table": "silver_budgets",
+      "column": "source_file",
       "type": "VARCHAR"
+    },
+    {
+      "table": "silver_budgets",
+      "column": "is_unknown_department",
+      "type": "BOOLEAN"
     },
     {
       "table": "silver_invoices",
@@ -71,11 +426,6 @@
       "type": "VARCHAR"
     },
     {
-      "table": "silver_invoices",
-      "column": "load_batch",
-      "type": "VARCHAR"
-    },
-    {
       "table": "silver_transactions",
       "column": "transaction_id",
       "type": "VARCHAR"
@@ -102,18 +452,43 @@
     },
     {
       "table": "silver_transactions",
+      "column": "vendor_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
       "column": "vendor_name",
       "type": "VARCHAR"
     },
     {
       "table": "silver_transactions",
-      "column": "amount_usd",
+      "column": "customer_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "customer_id_raw",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "amount_local",
       "type": "DECIMAL(18,2)"
     },
     {
       "table": "silver_transactions",
       "column": "currency",
       "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "fx_rate",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "amount_usd",
+      "type": "DECIMAL(18,2)"
     },
     {
       "table": "silver_transactions",
@@ -127,11 +502,136 @@
     },
     {
       "table": "silver_transactions",
-      "column": "load_batch",
+      "column": "op",
       "type": "VARCHAR"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "event_version",
+      "type": "INTEGER"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "ingested_at",
+      "type": "TIMESTAMP WITH TIME ZONE"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "is_late_arriving",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "is_adjustment",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "is_test_customer",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "dq_flags",
+      "type": "VARCHAR[]"
+    },
+    {
+      "table": "silver_transactions",
+      "column": "source_file",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "vendor_alias",
+      "column": "alias",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "vendor_alias",
+      "column": "alias_type",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "vendor_alias",
+      "column": "vendor_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "vendors",
+      "column": "vendor_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "vendors",
+      "column": "vendor_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "vendors",
+      "column": "vendor_category",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "vendors",
+      "column": "country",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "vendors",
+      "column": "payment_terms_days",
+      "type": "INTEGER"
+    },
+    {
+      "table": "vendors",
+      "column": "is_active",
+      "type": "BOOLEAN"
     }
   ],
   "gold": [
+    {
+      "table": "dim_customer",
+      "column": "customer_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "dim_customer",
+      "column": "customer_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_customer",
+      "column": "customer_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_customer",
+      "column": "email",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_customer",
+      "column": "segment",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_customer",
+      "column": "region",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_customer",
+      "column": "country",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_customer",
+      "column": "created_date",
+      "type": "DATE"
+    },
+    {
+      "table": "dim_customer",
+      "column": "is_test",
+      "type": "BOOLEAN"
+    },
     {
       "table": "dim_date",
       "column": "date_sk",
@@ -188,6 +688,31 @@
       "type": "BOOLEAN"
     },
     {
+      "table": "dim_date",
+      "column": "month_start",
+      "type": "DATE"
+    },
+    {
+      "table": "dim_date",
+      "column": "quarter_label",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_date",
+      "column": "day_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_date",
+      "column": "is_business_day",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "dim_date",
+      "column": "is_past",
+      "type": "BOOLEAN"
+    },
+    {
       "table": "dim_department",
       "column": "department_id",
       "type": "BIGINT"
@@ -213,6 +738,76 @@
       "type": "INTEGER"
     },
     {
+      "table": "dim_department",
+      "column": "region",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_department",
+      "column": "business_function",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_department",
+      "column": "is_active",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "dim_department_history",
+      "column": "department_version_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "dim_department_history",
+      "column": "department_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "dim_department_history",
+      "column": "dept_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_department_history",
+      "column": "department_name",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_department_history",
+      "column": "cost_center",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_department_history",
+      "column": "headcount",
+      "type": "INTEGER"
+    },
+    {
+      "table": "dim_department_history",
+      "column": "region",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_department_history",
+      "column": "is_active",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "dim_department_history",
+      "column": "valid_from",
+      "type": "DATE"
+    },
+    {
+      "table": "dim_department_history",
+      "column": "valid_to",
+      "type": "DATE"
+    },
+    {
+      "table": "dim_department_history",
+      "column": "is_current",
+      "type": "BOOLEAN"
+    },
+    {
       "table": "dim_gl_account",
       "column": "account_id",
       "type": "BIGINT"
@@ -233,9 +828,29 @@
       "type": "VARCHAR"
     },
     {
+      "table": "dim_gl_account",
+      "column": "parent_account_code",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_gl_account",
+      "column": "statement_section",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "dim_gl_account",
+      "column": "is_active",
+      "type": "BOOLEAN"
+    },
+    {
       "table": "dim_vendor",
       "column": "vendor_id",
       "type": "BIGINT"
+    },
+    {
+      "table": "dim_vendor",
+      "column": "vendor_code",
+      "type": "VARCHAR"
     },
     {
       "table": "dim_vendor",
@@ -251,6 +866,106 @@
       "table": "dim_vendor",
       "column": "country",
       "type": "VARCHAR"
+    },
+    {
+      "table": "dim_vendor",
+      "column": "payment_terms_days",
+      "type": "INTEGER"
+    },
+    {
+      "table": "dim_vendor",
+      "column": "is_active",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "dim_vendor",
+      "column": "is_inferred",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "invoice_sk",
+      "type": "BIGINT"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "invoice_id",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "invoice_number",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "vendor_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "invoice_date_sk",
+      "type": "INTEGER"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "due_date_sk",
+      "type": "INTEGER"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "doc_type",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "status",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "currency",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "amount_usd",
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "paid_amount_usd",
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "open_amount_usd",
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "days_past_due",
+      "type": "BIGINT"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "aging_bucket",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "paid_date",
+      "type": "DATE"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "is_overpaid",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "fact_ap_invoices",
+      "column": "due_date_repaired",
+      "type": "BOOLEAN"
     },
     {
       "table": "fact_budget",
@@ -280,7 +995,22 @@
     {
       "table": "fact_budget",
       "column": "budget_amount_usd",
-      "type": "DECIMAL(38,2)"
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "fact_budget",
+      "column": "budget_version",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "fact_budget",
+      "column": "is_latest_version",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "fact_budget",
+      "column": "submitted_at",
+      "type": "TIMESTAMP WITH TIME ZONE"
     },
     {
       "table": "fact_transactions",
@@ -314,6 +1044,11 @@
     },
     {
       "table": "fact_transactions",
+      "column": "customer_id",
+      "type": "BIGINT"
+    },
+    {
+      "table": "fact_transactions",
       "column": "amount_usd",
       "type": "DECIMAL(18,2)"
     },
@@ -336,6 +1071,56 @@
       "table": "fact_transactions",
       "column": "event_ts",
       "type": "TIMESTAMP WITH TIME ZONE"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "amount_local",
+      "type": "DECIMAL(18,2)"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "fx_rate",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "is_late_arriving",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "is_adjustment",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "fact_transactions",
+      "column": "ingested_at",
+      "type": "TIMESTAMP WITH TIME ZONE"
+    },
+    {
+      "table": "kpi_ap_aging",
+      "column": "as_of_date",
+      "type": "DATE"
+    },
+    {
+      "table": "kpi_ap_aging",
+      "column": "aging_bucket",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "kpi_ap_aging",
+      "column": "vendor_category",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "kpi_ap_aging",
+      "column": "invoice_count",
+      "type": "BIGINT"
+    },
+    {
+      "table": "kpi_ap_aging",
+      "column": "open_amount_usd",
+      "type": "DECIMAL(38,2)"
     },
     {
       "table": "kpi_monthly_actual_vs_budget",
@@ -375,7 +1160,7 @@
     {
       "table": "kpi_monthly_actual_vs_budget",
       "column": "budget_expense",
-      "type": "DECIMAL(38,2)"
+      "type": "DOUBLE"
     },
     {
       "table": "kpi_monthly_actual_vs_budget",
@@ -391,6 +1176,51 @@
       "table": "kpi_monthly_actual_vs_budget",
       "column": "burn_rate",
       "type": "DOUBLE"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "budget_revenue",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "revenue_variance_pct",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "kpi_monthly_actual_vs_budget",
+      "column": "is_month_to_date",
+      "type": "BOOLEAN"
+    },
+    {
+      "table": "kpi_revenue_by_segment",
+      "column": "month_start",
+      "type": "DATE"
+    },
+    {
+      "table": "kpi_revenue_by_segment",
+      "column": "segment",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "kpi_revenue_by_segment",
+      "column": "region",
+      "type": "VARCHAR"
+    },
+    {
+      "table": "kpi_revenue_by_segment",
+      "column": "revenue_usd",
+      "type": "DECIMAL(38,2)"
+    },
+    {
+      "table": "kpi_revenue_by_segment",
+      "column": "active_customers",
+      "type": "BIGINT"
+    },
+    {
+      "table": "kpi_revenue_by_segment",
+      "column": "transactions",
+      "type": "BIGINT"
     },
     {
       "table": "monthly_financials",
@@ -425,6 +1255,16 @@
     {
       "table": "monthly_financials",
       "column": "expense_vs_budget_pct",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "monthly_financials",
+      "column": "total_budget_expense",
+      "type": "DOUBLE"
+    },
+    {
+      "table": "monthly_financials",
+      "column": "total_budget_revenue",
       "type": "DOUBLE"
     }
   ]

@@ -7,16 +7,19 @@ from config import settings
 
 log = logging.getLogger(__name__)
 
-GOLD_TABLES = [
-    "dim_date",
-    "dim_department",
-    "dim_gl_account",
-    "dim_vendor",
-    "fact_transactions",
-    "fact_budget",
-    "kpi_monthly_actual_vs_budget",
-    "monthly_financials",
-]
+def gold_tables(max_rows: int | None = None) -> tuple[list[str], list[str]]:
+    """Gold tables to sync, and those skipped because they exceed max_rows (free-tier OLTP targets)."""
+    import duckdb
+
+    con = duckdb.connect(str(settings.DUCKDB_PATH), read_only=True)
+    try:
+        rows = con.execute(
+            "SELECT table_name, estimated_size FROM duckdb_tables() WHERE schema_name = 'gold' ORDER BY 1"
+        ).fetchall()
+    finally:
+        con.close()
+    keep = [t for t, n in rows if max_rows is None or n <= max_rows]
+    return keep, [t for t, _ in rows if t not in keep]
 
 
 def sync_motherduck() -> dict[str, Any]:
@@ -24,35 +27,20 @@ def sync_motherduck() -> dict[str, Any]:
         return {"status": "skipped", "reason": "MOTHERDUCK_TOKEN not set"}
     import duckdb
 
-    local_con = duckdb.connect(str(settings.DUCKDB_PATH), read_only=True)
+    tables, _ = gold_tables()
     try:
         md = duckdb.connect(f"md:?motherduck_token={settings.MOTHERDUCK_TOKEN}")
         try:
             md.execute("CREATE DATABASE IF NOT EXISTS finance_lakehouse")
             md.execute("USE finance_lakehouse")
+            md.execute(f"ATTACH '{settings.DUCKDB_PATH.as_posix()}' AS local_wh (READ_ONLY)")
             results: dict[str, Any] = {}
-            for table in GOLD_TABLES:
-                rows = local_con.execute(f"SELECT * FROM gold.{table}").fetchall()
-                cols = [d[0] for d in local_con.execute(f"SELECT * FROM gold.{table} LIMIT 0").description]
-                df = pd_from_rows(rows, cols)
-                md.register("_sync_df", df)
-                md.execute("CREATE OR REPLACE TABLE _incoming AS SELECT * FROM _sync_df")
-                md.execute(f"DROP TABLE IF EXISTS {table}")
-                md.execute(f"CREATE TABLE {table} AS SELECT * FROM _incoming")
-                md.execute("DROP TABLE _incoming")
-                md.unregister("_sync_df")
-                results[table] = len(df)
+            for table in tables:
+                md.execute(f"CREATE OR REPLACE TABLE {table} AS SELECT * FROM local_wh.gold.{table}")
+                results[table] = md.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
             return {"status": "ok", "tables": results}
         finally:
             md.close()
     except Exception as exc:
         log.exception("MotherDuck sync failed")
         return {"status": "error", "reason": str(exc)}
-    finally:
-        local_con.close()
-
-
-def pd_from_rows(rows: list[tuple], columns: list[str]):
-    import pandas as pd
-
-    return pd.DataFrame(rows, columns=columns)

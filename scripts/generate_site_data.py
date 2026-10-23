@@ -26,6 +26,7 @@ def build() -> bool:
         "channels": [],
         "gold_tables": {},
         "last_transform_utc": None,
+        "data_quality": None,
     }
 
     meta_path = PROJECT_ROOT / "data" / "transform_meta.json"
@@ -64,7 +65,7 @@ def build() -> bool:
                     "SELECT COUNT(*) FROM gold.fact_transactions"
                 ).fetchone()[0]
                 status["months_covered"] = con.execute(
-                    "SELECT COUNT(DISTINCT year_month) FROM gold.dim_date"
+                    "SELECT COUNT(DISTINCT date_trunc('month', event_ts)) FROM gold.fact_transactions"
                 ).fetchone()[0]
                 status["channels"] = [
                     r[0]
@@ -73,6 +74,24 @@ def build() -> bool:
                     ).fetchall()
                 ]
                 status["warehouse_ready"] = True
+            except Exception:
+                pass
+
+            try:
+                landed, quarantined, repaired, tests, failed = con.execute(
+                    """
+                    SELECT sum(total_rows) FILTER (WHERE check_name = 'rows_landed'),
+                           sum(failed_rows) FILTER (WHERE action = 'quarantined'),
+                           sum(failed_rows) FILTER (WHERE layer = 'silver' AND action IN ('repaired', 'merged', 'flagged')),
+                           count(*) FILTER (WHERE layer = 'gold'),
+                           count(*) FILTER (WHERE layer = 'gold' AND severity = 'error' AND failed_rows > 0)
+                    FROM audit.dq_results WHERE run_id = (SELECT max(run_id) FROM audit.dq_results)
+                    """
+                ).fetchone()
+                status["data_quality"] = {
+                    "rows_landed": landed, "rows_quarantined": quarantined, "rows_repaired_or_flagged": repaired,
+                    "gold_tests": tests, "gold_tests_failed": failed,
+                }
             except Exception:
                 pass
         finally:

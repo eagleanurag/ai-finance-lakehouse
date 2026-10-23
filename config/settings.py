@@ -15,8 +15,11 @@ BRONZE_TXN_DIR = LAKE_DIR / "bronze" / "transactions"
 BRONZE_INVOICE_DIR = LAKE_DIR / "bronze" / "invoices"
 BRONZE_BUDGET_DIR = LAKE_DIR / "bronze" / "budgets"
 BRONZE_MASTER_DIR = LAKE_DIR / "bronze" / "masters"
+BRONZE_AP_DIR = LAKE_DIR / "bronze" / "ap_invoices"
+BRONZE_FX_DIR = LAKE_DIR / "bronze" / "fx_rates"
 
-SQL_MODELS_DIR = PROJECT_ROOT / "transform" / "sql"
+NOTEBOOKS_DIR = PROJECT_ROOT / "notebooks"
+TRANSFORM_NOTEBOOKS = ["01_bronze_to_silver.ipynb", "02_silver_to_gold.ipynb"]
 
 
 def _secret(key: str, default: str = "") -> str:
@@ -93,6 +96,16 @@ SHAREPOINT_FOLDER_PATH = _secret("SHAREPOINT_FOLDER_PATH", "finance-exports")
 
 POWERBI_EMBED_URL = _secret("POWERBI_EMBED_URL")
 SIM_TXNS_PER_DAY = int(_secret("SIM_TXNS_PER_DAY", "25"))
+SIM_TARGET_FACT_ROWS = int(_secret("SIM_TARGET_FACT_ROWS", "2000000"))
+SIM_HISTORY_MONTHS = int(_secret("SIM_HISTORY_MONTHS", "24"))
+DUCKDB_MEMORY_LIMIT = _secret("DUCKDB_MEMORY_LIMIT", "1500MB")
+# nightly CI publishes the built warehouse here; the app downloads it instead of rebuilding 2M rows
+WAREHOUSE_SNAPSHOT_URL = _secret(
+    "WAREHOUSE_SNAPSHOT_URL",
+    "https://github.com/eagleanurag/ai-finance-lakehouse/releases/download/warehouse-latest",
+)
+# free-tier OLTP targets (Neon 0.5 GB, Azure SQL) only receive tables up to this size
+SYNC_MAX_ROWS = int(_secret("SYNC_MAX_ROWS", "250000"))
 
 for _d in (DATA_DIR, LAKE_DIR, OUTBOX_DIR, INVOICES_DIR, FILES_DIR, SHAREPOINT_EXPORT_DIR):
     _d.mkdir(parents=True, exist_ok=True)
@@ -104,6 +117,8 @@ def ensure_dirs() -> None:
         BRONZE_INVOICE_DIR,
         BRONZE_BUDGET_DIR,
         BRONZE_MASTER_DIR,
+        BRONZE_AP_DIR,
+        BRONZE_FX_DIR,
         OUTBOX_DIR,
         DUCKDB_PATH.parent,
     ):

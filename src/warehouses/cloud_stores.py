@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from config import settings
-from src.warehouses.duckdb_store import GOLD_TABLES
+from src.warehouses.duckdb_store import gold_tables
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def sync_bigquery() -> dict[str, Any]:
             client.create_dataset(dataset_ref, exists_ok=True)
         except Exception:
             pass
-        for table in GOLD_TABLES:
+        for table in gold_tables()[0]:
             df = local.execute(f"SELECT * FROM gold.{table}").fetchdf()
             df.columns = [c.lower() for c in df.columns]
             job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
@@ -64,9 +64,10 @@ def sync_mssql() -> dict[str, Any]:
 
         conn = pyodbc.connect(settings.MSSQL_DSN, timeout=30)
         cursor = conn.cursor()
+        tables, too_large = gold_tables(max_rows=settings.SYNC_MAX_ROWS)
         local = duckdb.connect(str(settings.DUCKDB_PATH), read_only=True)
         results: dict[str, int] = {}
-        for table in GOLD_TABLES:
+        for table in tables:
             df = local.execute(f"SELECT * FROM gold.{table}").fetchdf()
             df.columns = [c.lower() for c in df.columns]
             cols_sql = ", ".join(f"[{c}] NVARCHAR(MAX)" for c in df.columns)
@@ -82,7 +83,8 @@ def sync_mssql() -> dict[str, Any]:
             results[table] = len(df)
         local.close()
         conn.close()
-        return {"status": "ok", "tables": results}
+        return {"status": "ok", "tables": results,
+                "skipped_over_row_limit": {"limit": settings.SYNC_MAX_ROWS, "tables": too_large}}
     except Exception as exc:
         log.exception("MSSQL sync failed")
         return {"status": "error", "reason": str(exc)}

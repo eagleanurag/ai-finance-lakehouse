@@ -6,9 +6,12 @@ on:
     paths:
       - "docs/**"
       - "src/**"
-      - "transform/**"
+      - "notebooks/**"
       - "run_pipeline.py"
       - ".github/workflows/deploy_pages.yml"
+  workflow_run:
+    workflows: ["Daily Lakehouse Pipeline"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -23,7 +26,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -37,12 +40,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Rebuild warehouse snapshot for live site numbers
-        env:
-          SIM_TXNS_PER_DAY: "25"
+      - name: Fetch the nightly warehouse snapshot (build it if none is published yet)
         run: |
-          python run_pipeline.py ingest --days 400 --no-ocr
-          python run_pipeline.py transform
+          python -c "import sys; from src.pipelines import snapshot; sys.exit(0 if snapshot.download() else 1)"             || (python run_pipeline.py ingest --no-ocr && python run_pipeline.py transform)
 
       - name: Generate site data (dictionary + status)
         run: python scripts/generate_site_data.py
